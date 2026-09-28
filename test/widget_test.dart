@@ -8,23 +8,33 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:taskora/main.dart';
+import 'package:taskora/views/splash/splash_view.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('splash screen shows the Taskora logo', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(home: TaskoraSplashView()));
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    expect(find.byKey(const ValueKey('taskora_splash_logo')), findsOneWidget);
+    expect(find.byKey(const ValueKey('taskora_title_letter_0')), findsOneWidget);
+    expect(find.byKey(const ValueKey('taskora_title_letter_6')), findsOneWidget);
+  });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+  testWidgets('subtitle stays below the logo', (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    await tester.pumpWidget(const MaterialApp(home: TaskoraSplashView()));
+    await tester.pump(const Duration(milliseconds: 3200));
+
+    final logoBounds = tester.getRect(
+      find.byKey(const ValueKey('taskora_splash_logo')),
+    );
+    final subtitleBounds = tester.getRect(
+      find.byKey(const ValueKey('taskora_splash_subtitle')),
+    );
+
+    expect(logoBounds.bottom, lessThanOrEqualTo(subtitleBounds.top));
   });
 }
