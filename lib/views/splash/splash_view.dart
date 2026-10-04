@@ -4,7 +4,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../home/home_view.dart';
+import '../login/login_view.dart';
 
 class TaskoraSplashView extends StatefulWidget {
   const TaskoraSplashView({super.key});
@@ -21,32 +21,26 @@ class _TaskoraSplashViewState extends State<TaskoraSplashView>
   static const _oceanBlue = Color(0xFF4B7FC7);
 
   late final AnimationController _controller;
-
   @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 4800),
-    )..addStatusListener((status) {
-        if (status == AnimationStatus.completed && mounted) {
-          Navigator.of(context).pushReplacement(
-            PageRouteBuilder<void>(
-              transitionDuration: const Duration(milliseconds: 450),
-              pageBuilder: (_, __, ___) => const TaskoraHomeView(),
-              transitionsBuilder: (_, animation, __, child) => FadeTransition(
-                opacity: CurvedAnimation(
-                  parent: animation,
-                  curve: Curves.easeInOut,
-                ),
-                child: child,
-              ),
-            ),
-          );
-        }
-      });
-    _controller.forward();
-  }
+void initState() {
+  super.initState();
+
+  _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 4800),
+  )..addStatusListener((status) {
+      if (status == AnimationStatus.completed && mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const TaskoraLoginView(),
+          ),
+        );
+      }
+    });
+
+  _controller.forward();
+}
 
   @override
   void dispose() {

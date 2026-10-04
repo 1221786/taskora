@@ -8,9 +8,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:taskora/views/login/login_view.dart';
 import 'package:taskora/views/splash/splash_view.dart';
 
 void main() {
+  testWidgets('login screen lays out without unbounded flex errors', (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(502, 558);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(const MaterialApp(home: TaskoraLoginView()));
+
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('splash screen shows the Taskora logo', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(home: TaskoraSplashView()));
 
