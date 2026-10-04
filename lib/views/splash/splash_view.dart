@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../home/home_view.dart';
 
@@ -246,10 +247,11 @@ class _AnimatedTitle extends StatelessWidget {
                   child: Text(
                     letters[index],
                     key: ValueKey('taskora_title_letter_$index'),
-                    style: const TextStyle(
+                    style: GoogleFonts.outfit(
                       color: Color(0xFF1B2B4F),
                       fontSize: 29,
                       fontWeight: FontWeight.w800,
+                      fontStyle: FontStyle.italic,
                     ),
                   ),
                 ),
