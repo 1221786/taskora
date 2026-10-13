@@ -22,25 +22,24 @@ class _TaskoraSplashViewState extends State<TaskoraSplashView>
 
   late final AnimationController _controller;
   @override
-void initState() {
-  super.initState();
+  void initState() {
+    super.initState();
 
-  _controller = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 4800),
-  )..addStatusListener((status) {
-      if (status == AnimationStatus.completed && mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const TaskoraLoginView(),
-          ),
-        );
-      }
-    });
+    _controller =
+        AnimationController(
+          vsync: this,
+          duration: const Duration(milliseconds: 4800),
+        )..addStatusListener((status) {
+          if (status == AnimationStatus.completed && mounted) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const TaskoraLoginView()),
+            );
+          }
+        });
 
-  _controller.forward();
-}
+    _controller.forward();
+  }
 
   @override
   void dispose() {
@@ -75,16 +74,20 @@ void initState() {
           );
 
           final titleTop = safeArea.top + 28;
-          final logoTop =
-              math.max(titleTop + 72, size.height * 0.285).toDouble();
+          final logoTop = math
+              .max(titleTop + 72, size.height * 0.285)
+              .toDouble();
           final barBottom = safeArea.bottom + 28;
           final subtitleBottomLimit = size.height - barBottom - 64;
-          final preferredLogoSize =
-              (size.shortestSide * 0.46).clamp(128.0, 224.0).toDouble();
+          final preferredLogoSize = (size.shortestSide * 0.46)
+              .clamp(128.0, 224.0)
+              .toDouble();
           final availableLogoSize = math
               .max(112.0, subtitleBottomLimit - logoTop - 44)
               .toDouble();
-          final logoSize = math.min(preferredLogoSize, availableLogoSize).toDouble();
+          final logoSize = math
+              .min(preferredLogoSize, availableLogoSize)
+              .toDouble();
           final subtitleTop = logoTop + logoSize + 24;
           final pulse = (math.sin(timeline * math.pi * 6) + 1) / 2;
           final auraScale = 1.01 + (pulse * 0.09);
@@ -132,7 +135,9 @@ void initState() {
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFF9AF1DC).withOpacity(0.48),
+                                color: const Color(
+                                  0xFF9AF1DC,
+                                ).withOpacity(0.48),
                                 blurRadius: logoSize * 0.42,
                                 spreadRadius: logoSize * 0.04,
                               ),

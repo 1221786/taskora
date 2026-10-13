@@ -27,14 +27,14 @@ class _TaskoraDashboardViewState extends State<TaskoraDashboardView> {
               right: 20,
 
               child: IconButton(
-  onPressed: () {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const TaskoraLoginView(),
-      ),
-    );
-  },
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const TaskoraLoginView(),
+                    ),
+                  );
+                },
                 icon: const Icon(
                   Icons.logout_rounded,
                   size: 27,
@@ -53,17 +53,11 @@ class _TaskoraDashboardViewState extends State<TaskoraDashboardView> {
           decoration: const BoxDecoration(
             color: AppColors.background,
             border: Border(
-              top: BorderSide(
-                color: Color(0xFFD9E0E7),
-                width: 0.8,
-              ),
+              top: BorderSide(color: Color(0xFFD9E0E7), width: 0.8),
             ),
           ),
           child: Padding(
-            padding: const EdgeInsets.only(
-              top: 8,
-              bottom: 5,
-            ),
+            padding: const EdgeInsets.only(top: 8, bottom: 5),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -145,11 +139,7 @@ class _NavItem extends StatelessWidget {
     return IconButton(
       onPressed: onTap,
       splashRadius: 24,
-      icon: Icon(
-        icon,
-        size: 25,
-        color: const Color(0xFF1B2B4F),
-      ),
+      icon: Icon(icon, size: 25, color: const Color(0xFF1B2B4F)),
     );
   }
 }

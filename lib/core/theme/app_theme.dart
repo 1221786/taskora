@@ -28,9 +28,7 @@ class AppTheme {
     ),
 
     textButtonTheme: TextButtonThemeData(
-      style: TextButton.styleFrom(
-        foregroundColor: AppColors.primary,
-      ),
+      style: TextButton.styleFrom(foregroundColor: AppColors.primary),
     ),
   );
 }
