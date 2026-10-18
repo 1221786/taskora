@@ -127,8 +127,8 @@ class _TaskoraSplashViewState extends State<TaskoraSplashView>
                             shape: BoxShape.circle,
                             gradient: RadialGradient(
                               colors: [
-                                const Color(0xFFA1F4D7).withOpacity(0.52),
-                                const Color(0xFF7BE2D3).withOpacity(0.22),
+                                const Color(0xFFA1F4D7).withValues(alpha: 0.52),
+                                const Color(0xFF7BE2D3).withValues(alpha: 0.22),
                                 Colors.transparent,
                               ],
                               stops: const [0, 0.48, 1],
@@ -137,7 +137,7 @@ class _TaskoraSplashViewState extends State<TaskoraSplashView>
                               BoxShadow(
                                 color: const Color(
                                   0xFF9AF1DC,
-                                ).withOpacity(0.48),
+                                ).withValues(alpha: 0.48),
                                 blurRadius: logoSize * 0.42,
                                 spreadRadius: logoSize * 0.04,
                               ),
@@ -276,7 +276,7 @@ class _LoadingBar extends StatelessWidget {
       width: width,
       height: 4,
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.25),
+        color: Colors.white.withValues(alpha: 0.25),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Align(
@@ -291,7 +291,7 @@ class _LoadingBar extends StatelessWidget {
             ),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF83F1DD).withOpacity(0.8),
+                color: const Color(0xFF83F1DD).withValues(alpha: 0.8),
                 blurRadius: 8,
               ),
             ],

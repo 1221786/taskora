@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+
 import 'package:taskora/core/theme/app_colors.dart';
 import 'package:taskora/core/utils/validators.dart';
 import 'package:taskora/form_widget/form_widget.dart';
+import 'package:taskora/viewmodels/login_viewmodel.dart';
 import 'package:taskora/views/signup/signup_view.dart';
 import '../dashboard/dashboard_view.dart';
 
@@ -18,40 +20,106 @@ class _TaskoraLoginViewState extends State<TaskoraLoginView> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
+  late final LoginViewModel viewModel;
+
   bool obscurePassword = true;
-  bool isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    viewModel = LoginViewModel();
+    viewModel.addListener(_onViewModelChanged);
+  }
+
+  void _onViewModelChanged() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
 
   Future<void> login() async {
-    // Validate fields
+    // 1. Validate the form
     if (!formKey.currentState!.validate()) {
       return;
     }
 
-    // Start loading
-    setState(() {
-      isLoading = true;
-    });
+    if (viewModel.isLoading) return;
 
-    // Temporary loading simulation
-    await Future.delayed(const Duration(seconds: 2));
+    // 2. Call the ViewModel
+    final errorMessage = await viewModel.login(
+      email: emailController.text.trim(),
+      password: passwordController.text,
+    );
 
     if (!mounted) return;
 
-    setState(() {
-      isLoading = false;
-    });
+    // 3. Show an error if login failed
+    if (errorMessage != null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(errorMessage)));
+      return;
+    }
 
-    // Open dashboard
+    // 4. Navigate only after successful login
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => const TaskoraDashboardView()),
     );
   }
 
+  Future<void> resetPassword() async {
+    final email = emailController.text.trim();
+
+    // 1. Check email input
+    if (email.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter your email address first.')),
+      );
+      return;
+    }
+
+    // 2. Validate email format
+    final emailError = FormValidators.validateEmail(email);
+
+    if (emailError != null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(emailError)));
+      return;
+    }
+
+    if (viewModel.isLoading) return;
+
+    // 3. Call the ViewModel
+    final errorMessage = await viewModel.resetPassword(email);
+
+    if (!mounted) return;
+
+    if (errorMessage != null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(errorMessage)));
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'If an account exists for this email, a password reset email will be sent.',
+        ),
+      ),
+    );
+  }
+
   @override
   void dispose() {
+    viewModel.removeListener(_onViewModelChanged);
+    viewModel.dispose();
+
     emailController.dispose();
     passwordController.dispose();
+
     super.dispose();
   }
 
@@ -124,7 +192,7 @@ class _TaskoraLoginViewState extends State<TaskoraLoginView> {
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
-                  onPressed: () {},
+                  onPressed: viewModel.isLoading ? null : resetPassword,
                   child: const Text(
                     'Forgot Password?',
                     style: TextStyle(
@@ -139,7 +207,7 @@ class _TaskoraLoginViewState extends State<TaskoraLoginView> {
 
               GradientFormButton(
                 text: 'Login',
-                isLoading: isLoading,
+                isLoading: viewModel.isLoading,
                 onPressed: login,
               ),
 
@@ -150,14 +218,16 @@ class _TaskoraLoginViewState extends State<TaskoraLoginView> {
                 children: [
                   const Text("Don't have an account?"),
                   TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const TaskoraSignupView(),
-                        ),
-                      );
-                    },
+                    onPressed: viewModel.isLoading
+                        ? null
+                        : () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const TaskoraSignupView(),
+                              ),
+                            );
+                          },
                     child: const Text('Sign Up'),
                   ),
                 ],

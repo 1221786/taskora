@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+
 import 'package:taskora/core/theme/app_colors.dart';
 import 'package:taskora/core/utils/validators.dart';
 import 'package:taskora/form_widget/form_widget.dart';
+import 'package:taskora/viewmodels/signup_viewmodel.dart';
+import 'package:taskora/views/login/login_view.dart';
 
 class TaskoraSignupView extends StatefulWidget {
   const TaskoraSignupView({super.key});
@@ -18,42 +21,73 @@ class _TaskoraSignupViewState extends State<TaskoraSignupView> {
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
 
+  late final SignupViewModel viewModel;
+
   bool obscurePassword = true;
-  bool isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    viewModel = SignupViewModel();
+    viewModel.addListener(_onViewModelChanged);
+  }
+
+  void _onViewModelChanged() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
 
   Future<void> signup() async {
-    // Validate fields
+    // 1. Validate all fields
     if (!formKey.currentState!.validate()) {
       return;
     }
 
-    // Start loading
-    setState(() {
-      isLoading = true;
-    });
+    if (viewModel.isLoading) return;
 
-    // Temporary loading simulation
-    await Future.delayed(const Duration(seconds: 2));
+    // 2. Call the ViewModel
+    final errorMessage = await viewModel.signup(
+      name: nameController.text.trim(),
+      email: emailController.text.trim(),
+      password: passwordController.text,
+    );
 
     if (!mounted) return;
 
-    setState(() {
-      isLoading = false;
-    });
+    // 3. If signup fails, show the error
+    if (errorMessage != null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(errorMessage)));
+      return;
+    }
 
+    // 4. Show success message
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Validation successful. Firebase is not connected yet.'),
+        content: Text('Account created successfully! Please log in.'),
       ),
+    );
+
+    // 5. Navigate to Login and remove Signup from the stack
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const TaskoraLoginView()),
+      (route) => false,
     );
   }
 
   @override
   void dispose() {
+    viewModel.removeListener(_onViewModelChanged);
+    viewModel.dispose();
+
     nameController.dispose();
     emailController.dispose();
     passwordController.dispose();
     confirmPasswordController.dispose();
+
     super.dispose();
   }
 
@@ -157,7 +191,7 @@ class _TaskoraSignupViewState extends State<TaskoraSignupView> {
 
               GradientFormButton(
                 text: 'Sign Up',
-                isLoading: isLoading,
+                isLoading: viewModel.isLoading,
                 onPressed: signup,
               ),
 
@@ -168,9 +202,11 @@ class _TaskoraSignupViewState extends State<TaskoraSignupView> {
                 children: [
                   const Text('Already have an account?'),
                   TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
+                    onPressed: viewModel.isLoading
+                        ? null
+                        : () {
+                            Navigator.pop(context);
+                          },
                     child: const Text('Log In'),
                   ),
                 ],
