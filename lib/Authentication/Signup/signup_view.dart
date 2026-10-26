@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:taskora/core/theme/app_colors.dart';
 import 'package:taskora/core/utils/validators.dart';
 import 'package:taskora/form_widget/form_widget.dart';
-import 'package:taskora/viewmodels/signup_viewmodel.dart';
-import 'package:taskora/views/login/login_view.dart';
+
+import 'package:taskora/Authentication/Signup/signup_viewmodel.dart';
+import 'package:taskora/Authentication/Login/login_view.dart';
+import 'package:taskora/Authentication/models/signup_model.dart';
 
 class TaskoraSignupView extends StatefulWidget {
   const TaskoraSignupView({super.key});
@@ -28,6 +30,7 @@ class _TaskoraSignupViewState extends State<TaskoraSignupView> {
   @override
   void initState() {
     super.initState();
+
     viewModel = SignupViewModel();
     viewModel.addListener(_onViewModelChanged);
   }
@@ -36,46 +39,6 @@ class _TaskoraSignupViewState extends State<TaskoraSignupView> {
     if (mounted) {
       setState(() {});
     }
-  }
-
-  Future<void> signup() async {
-    // 1. Validate all fields
-    if (!formKey.currentState!.validate()) {
-      return;
-    }
-
-    if (viewModel.isLoading) return;
-
-    // 2. Call the ViewModel
-    final errorMessage = await viewModel.signup(
-      name: nameController.text.trim(),
-      email: emailController.text.trim(),
-      password: passwordController.text,
-    );
-
-    if (!mounted) return;
-
-    // 3. If signup fails, show the error
-    if (errorMessage != null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(errorMessage)));
-      return;
-    }
-
-    // 4. Show success message
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Account created successfully! Please log in.'),
-      ),
-    );
-
-    // 5. Navigate to Login and remove Signup from the stack
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => const TaskoraLoginView()),
-      (route) => false,
-    );
   }
 
   @override
@@ -192,7 +155,46 @@ class _TaskoraSignupViewState extends State<TaskoraSignupView> {
               GradientFormButton(
                 text: 'Sign Up',
                 isLoading: viewModel.isLoading,
-                onPressed: signup,
+                onPressed: () async {
+                  if (!formKey.currentState!.validate()) {
+                    return;
+                  }
+
+                  if (viewModel.isLoading) return;
+
+                  final model = SignupModel(
+                    name: nameController.text.trim(),
+                    email: emailController.text.trim(),
+                    password: passwordController.text,
+                  );
+
+                  final errorMessage = await viewModel.signup(model);
+
+                  if (!mounted) return;
+
+                  if (errorMessage != null) {
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text(errorMessage)));
+                    return;
+                  }
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Account created successfully! Please log in.',
+                      ),
+                    ),
+                  );
+
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const TaskoraLoginView(),
+                    ),
+                    (route) => false,
+                  );
+                },
               ),
 
               const SizedBox(height: 25),

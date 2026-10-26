@@ -4,7 +4,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../login/login_view.dart';
+import '../../Authentication/Login/login_view.dart';
 
 class TaskoraSplashView extends StatefulWidget {
   const TaskoraSplashView({super.key});

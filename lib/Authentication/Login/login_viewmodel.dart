@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import 'package:taskora/Authentication/models/login_model.dart';
+
 class LoginViewModel extends ChangeNotifier {
   bool isLoading = false;
   bool _isDisposed = false;
@@ -13,10 +15,7 @@ class LoginViewModel extends ChangeNotifier {
     }
   }
 
-  Future<String?> login({
-    required String email,
-    required String password,
-  }) async {
+  Future<String?> login(LoginModel model) async {
     if (isLoading) {
       return 'Please wait for the current operation to finish.';
     }
@@ -25,8 +24,8 @@ class LoginViewModel extends ChangeNotifier {
 
     try {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: email.trim(),
-        password: password,
+        email: model.email.trim(),
+        password: model.password,
       );
 
       return null;

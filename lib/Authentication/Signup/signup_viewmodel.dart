@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import 'package:taskora/Authentication/models/signup_model.dart';
+
 class SignupViewModel extends ChangeNotifier {
   bool isLoading = false;
   bool _isDisposed = false;
@@ -14,11 +16,7 @@ class SignupViewModel extends ChangeNotifier {
     }
   }
 
-  Future<String?> signup({
-    required String name,
-    required String email,
-    required String password,
-  }) async {
+  Future<String?> signup(SignupModel model) async {
     if (isLoading) {
       return 'Please wait for the current operation to finish.';
     }
@@ -30,8 +28,8 @@ class SignupViewModel extends ChangeNotifier {
     try {
       userCredential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(
-            email: email.trim(),
-            password: password,
+            email: model.email.trim(),
+            password: model.password,
           );
 
       final user = userCredential.user;
@@ -41,7 +39,7 @@ class SignupViewModel extends ChangeNotifier {
       }
 
       await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-        'name': name.trim(),
+        'name': model.name.trim(),
         'email': user.email,
         'createdAt': FieldValue.serverTimestamp(),
       });
@@ -51,14 +49,19 @@ class SignupViewModel extends ChangeNotifier {
       switch (e.code) {
         case 'email-already-in-use':
           return 'This email is already registered.';
+
         case 'invalid-email':
           return 'Please enter a valid email address.';
+
         case 'weak-password':
           return 'Please choose a stronger password.';
+
         case 'network-request-failed':
           return 'Check your internet connection.';
+
         case 'operation-not-allowed':
           return 'Email/Password sign-up is not enabled.';
+
         default:
           return 'Unable to create your account. Please try again.';
       }
@@ -68,7 +71,6 @@ class SignupViewModel extends ChangeNotifier {
         try {
           await userCredential!.user!.delete();
         } on FirebaseAuthException {
-          // Cleanup can fail, for example if recent authentication is required.
           return 'Profile saving failed. Your account may still exist. '
               'Please check Firebase before trying again.';
         } catch (_) {

@@ -8,7 +8,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:taskora/views/login/login_view.dart';
+import 'package:taskora/Authentication/Login/login_view.dart';
 import 'package:taskora/views/splash/splash_view.dart';
 
 void main() {

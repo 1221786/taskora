@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:taskora/core/theme/app_colors.dart';
-import '../login/login_view.dart';
+import '../../Authentication/Login/login_view.dart';
 
 class TaskoraDashboardView extends StatefulWidget {
   const TaskoraDashboardView({super.key});

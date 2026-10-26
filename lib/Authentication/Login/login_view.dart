@@ -3,9 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:taskora/core/theme/app_colors.dart';
 import 'package:taskora/core/utils/validators.dart';
 import 'package:taskora/form_widget/form_widget.dart';
-import 'package:taskora/viewmodels/login_viewmodel.dart';
-import 'package:taskora/views/signup/signup_view.dart';
-import '../dashboard/dashboard_view.dart';
+
+import 'package:taskora/Authentication/Login/login_viewmodel.dart';
+import 'package:taskora/Authentication/Signup/signup_view.dart';
+import 'package:taskora/Authentication/models/login_model.dart';
+
+import '../../views/dashboard/dashboard_view.dart';
+import 'package:taskora/Authentication/ResetPassword/reset_password_view.dart';
 
 class TaskoraLoginView extends StatefulWidget {
   const TaskoraLoginView({super.key});
@@ -27,6 +31,7 @@ class _TaskoraLoginViewState extends State<TaskoraLoginView> {
   @override
   void initState() {
     super.initState();
+
     viewModel = LoginViewModel();
     viewModel.addListener(_onViewModelChanged);
   }
@@ -35,81 +40,6 @@ class _TaskoraLoginViewState extends State<TaskoraLoginView> {
     if (mounted) {
       setState(() {});
     }
-  }
-
-  Future<void> login() async {
-    // 1. Validate the form
-    if (!formKey.currentState!.validate()) {
-      return;
-    }
-
-    if (viewModel.isLoading) return;
-
-    // 2. Call the ViewModel
-    final errorMessage = await viewModel.login(
-      email: emailController.text.trim(),
-      password: passwordController.text,
-    );
-
-    if (!mounted) return;
-
-    // 3. Show an error if login failed
-    if (errorMessage != null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(errorMessage)));
-      return;
-    }
-
-    // 4. Navigate only after successful login
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const TaskoraDashboardView()),
-    );
-  }
-
-  Future<void> resetPassword() async {
-    final email = emailController.text.trim();
-
-    // 1. Check email input
-    if (email.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter your email address first.')),
-      );
-      return;
-    }
-
-    // 2. Validate email format
-    final emailError = FormValidators.validateEmail(email);
-
-    if (emailError != null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(emailError)));
-      return;
-    }
-
-    if (viewModel.isLoading) return;
-
-    // 3. Call the ViewModel
-    final errorMessage = await viewModel.resetPassword(email);
-
-    if (!mounted) return;
-
-    if (errorMessage != null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(errorMessage)));
-      return;
-    }
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'If an account exists for this email, a password reset email will be sent.',
-        ),
-      ),
-    );
   }
 
   @override
@@ -192,7 +122,16 @@ class _TaskoraLoginViewState extends State<TaskoraLoginView> {
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
-                  onPressed: viewModel.isLoading ? null : resetPassword,
+                  onPressed: viewModel.isLoading
+                      ? null
+                      : () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const ResetPasswordView(),
+                            ),
+                          );
+                        },
                   child: const Text(
                     'Forgot Password?',
                     style: TextStyle(
@@ -208,7 +147,36 @@ class _TaskoraLoginViewState extends State<TaskoraLoginView> {
               GradientFormButton(
                 text: 'Login',
                 isLoading: viewModel.isLoading,
-                onPressed: login,
+                onPressed: () async {
+                  if (!formKey.currentState!.validate()) {
+                    return;
+                  }
+
+                  if (viewModel.isLoading) return;
+
+                  final model = LoginModel(
+                    email: emailController.text.trim(),
+                    password: passwordController.text,
+                  );
+
+                  final errorMessage = await viewModel.login(model);
+
+                  if (!mounted) return;
+
+                  if (errorMessage != null) {
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text(errorMessage)));
+                    return;
+                  }
+
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const TaskoraDashboardView(),
+                    ),
+                  );
+                },
               ),
 
               const SizedBox(height: 60),
