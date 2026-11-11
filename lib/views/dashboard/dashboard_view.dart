@@ -1,6 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:taskora/core/theme/app_colors.dart';
+
 import '../../Authentication/Login/login_view.dart';
+
+import 'dashboard_header.dart';
+import 'today_progress_card.dart';
+import 'today_tasks_section.dart';
+import 'upcoming_tasks_section.dart';
+import 'dashboard_bottom_navigation.dart';
+import 'dashboard_view_model.dart';
+
+import '../tasks/tasks_view.dart';
+import '../calendar/calendar_view.dart';
 
 class TaskoraDashboardView extends StatefulWidget {
   const TaskoraDashboardView({super.key});
@@ -10,136 +20,96 @@ class TaskoraDashboardView extends StatefulWidget {
 }
 
 class _TaskoraDashboardViewState extends State<TaskoraDashboardView> {
-  int currentIndex = 3;
+  late final DashboardViewModel _viewModel;
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
+  void initState() {
+    super.initState();
+    _viewModel = DashboardViewModel();
+  }
 
-      // Empty main screen
-      body: SafeArea(
-        child: Stack(
+  @override
+  void dispose() {
+    _viewModel.dispose();
+    super.dispose();
+  }
+
+  Widget _buildHomePage() {
+    return SafeArea(
+      child: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Log Out button
-            Positioned(
-              top: 8,
-              right: 20,
-
-              child: IconButton(
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const TaskoraLoginView(),
-                    ),
-                  );
-                },
-                icon: const Icon(
-                  Icons.logout_rounded,
-                  size: 27,
-                  color: Color(0xFF1B2B4F),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-
-      // Bottom Navigation
-      bottomNavigationBar: SafeArea(
-        top: false,
-        child: Container(
-          decoration: const BoxDecoration(
-            color: AppColors.background,
-            border: Border(
-              top: BorderSide(color: Color(0xFFD9E0E7), width: 0.8),
-            ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.only(top: 8, bottom: 5),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _NavItem(
-                      icon: Icons.home_outlined,
-                      isSelected: currentIndex == 0,
-                      onTap: () {
-                        setState(() {
-                          currentIndex = 0;
-                        });
-                      },
-                    ),
-                    _NavItem(
-                      icon: Icons.description_outlined,
-                      isSelected: currentIndex == 1,
-                      onTap: () {
-                        setState(() {
-                          currentIndex = 1;
-                        });
-                      },
-                    ),
-                    _NavItem(
-                      icon: Icons.calendar_month_outlined,
-                      isSelected: currentIndex == 2,
-                      onTap: () {
-                        setState(() {
-                          currentIndex = 2;
-                        });
-                      },
-                    ),
-                    _NavItem(
-                      icon: Icons.person_outline_rounded,
-                      isSelected: currentIndex == 3,
-                      onTap: () {
-                        setState(() {
-                          currentIndex = 3;
-                        });
-                      },
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 8),
-
-                // Home indicator
-                Container(
-                  width: 110,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.black,
-                    borderRadius: BorderRadius.circular(10),
+            DashboardHeader(
+              onLogout: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const TaskoraLoginView(),
                   ),
-                ),
-              ],
+                );
+              },
             ),
-          ),
+
+            const SizedBox(height: 26),
+            const TodayProgressCard(),
+
+            const SizedBox(height: 25),
+            const TodayTasksSection(),
+
+            const SizedBox(height: 25),
+            const UpcomingTasksSection(),
+
+            const SizedBox(height: 15),
+          ],
         ),
       ),
     );
   }
-}
 
-class _NavItem extends StatelessWidget {
-  const _NavItem({
-    required this.icon,
-    required this.isSelected,
-    required this.onTap,
-  });
+  Widget _buildSelectedPage() {
+    switch (_viewModel.currentIndex) {
+      case 1:
+        return const TasksView();
 
-  final IconData icon;
-  final bool isSelected;
-  final VoidCallback onTap;
+      case 2:
+        return const CalendarView();
+
+      case 3:
+        return const Center(
+          child: Text(
+            'Profile page coming soon',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF1B2B4F),
+            ),
+          ),
+        );
+
+      default:
+        return _buildHomePage();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
-      onPressed: onTap,
-      splashRadius: 24,
-      icon: Icon(icon, size: 25, color: const Color(0xFF1B2B4F)),
+    return ListenableBuilder(
+      listenable: _viewModel,
+      builder: (context, child) {
+        return Scaffold(
+          backgroundColor: const Color(0xFFF8F9FC),
+
+          body: _buildSelectedPage(),
+
+          bottomNavigationBar: DashboardBottomNavigation(
+            currentIndex: _viewModel.currentIndex,
+            onTap: _viewModel.changePage,
+          ),
+        );
+      },
     );
   }
 }
