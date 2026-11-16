@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:taskora/core/theme/app_colors.dart';
 
 class DashboardBottomNavigation extends StatelessWidget {
   final int currentIndex;
@@ -15,9 +16,9 @@ class DashboardBottomNavigation extends StatelessWidget {
     return SafeArea(
       top: false,
       child: Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          border: Border(top: BorderSide(color: Color(0xFFE5E8EF), width: 0.8)),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          border: Border(top: BorderSide(color: AppColors.border, width: 0.8)),
         ),
         child: Padding(
           padding: const EdgeInsets.only(top: 8, bottom: 5),
@@ -29,8 +30,9 @@ class DashboardBottomNavigation extends StatelessWidget {
                 children: [
                   _buildNavItem(icon: Icons.home_outlined, index: 0),
                   _buildNavItem(icon: Icons.description_outlined, index: 1),
-                  _buildNavItem(icon: Icons.calendar_month_outlined, index: 2),
-                  _buildNavItem(icon: Icons.person_outline_rounded, index: 3),
+                  _buildNavItem(icon: Icons.flag_outlined, index: 2),
+                  _buildNavItem(icon: Icons.bar_chart_rounded, index: 3),
+                  _buildNavItem(icon: Icons.person_outline_rounded, index: 4),
                 ],
               ),
               const SizedBox(height: 8),
@@ -38,7 +40,7 @@ class DashboardBottomNavigation extends StatelessWidget {
                 width: 110,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.black,
+                  color: AppColors.black,
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
@@ -58,7 +60,7 @@ class DashboardBottomNavigation extends StatelessWidget {
       icon: Icon(
         icon,
         size: 25,
-        color: isSelected ? const Color(0xFF6C63FF) : const Color(0xFF9297A5),
+        color: isSelected ? AppColors.primary : AppColors.mutedText,
       ),
     );
   }

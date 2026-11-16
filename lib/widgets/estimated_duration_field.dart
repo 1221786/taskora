@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/theme/app_colors.dart';
 
 class EstimatedDurationField extends StatelessWidget {
   final TextEditingController controller;
@@ -12,7 +13,11 @@ class EstimatedDurationField extends StatelessWidget {
       children: [
         const Text(
           'Estimated Duration',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
+          ),
         ),
 
         const SizedBox(height: 12),
@@ -20,12 +25,43 @@ class EstimatedDurationField extends StatelessWidget {
         TextFormField(
           controller: controller,
           keyboardType: TextInputType.number,
-          decoration: const InputDecoration(
+          style: const TextStyle(color: AppColors.textPrimary),
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: AppColors.white,
             labelText: 'Duration in minutes',
+            labelStyle: const TextStyle(color: AppColors.textSecondary),
             hintText: 'e.g. 60',
-            prefixIcon: Icon(Icons.timer_outlined),
+            hintStyle: const TextStyle(color: AppColors.mutedText),
+            prefixIcon: const Icon(
+              Icons.timer_outlined,
+              color: AppColors.primary,
+            ),
             suffixText: 'Minutes',
-            border: OutlineInputBorder(),
+            suffixStyle: const TextStyle(color: AppColors.textSecondary),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: AppColors.border),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: AppColors.border),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: AppColors.primary,
+                width: 1.5,
+              ),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: AppColors.danger),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: AppColors.danger, width: 1.5),
+            ),
           ),
           validator: (value) {
             if (value == null || value.trim().isEmpty) {

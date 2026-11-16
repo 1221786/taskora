@@ -4,21 +4,26 @@ class GoalSelector extends StatelessWidget {
   final String? selectedGoalId;
   final List<Map<String, String>> goals;
   final ValueChanged<String?> onGoalChanged;
+  final VoidCallback onSelectGoal;
 
   const GoalSelector({
     super.key,
     required this.selectedGoalId,
     required this.goals,
     required this.onGoalChanged,
+    required this.onSelectGoal,
   });
 
   @override
   Widget build(BuildContext context) {
-    final validGoalIds = goals.map((goal) => goal['id']).toSet();
+    Map<String, String>? selectedGoal;
 
-    final currentValue = validGoalIds.contains(selectedGoalId)
-        ? selectedGoalId
-        : null;
+    for (final goal in goals) {
+      if (goal['id'] == selectedGoalId) {
+        selectedGoal = goal;
+        break;
+      }
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -32,42 +37,61 @@ class GoalSelector extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 10),
-        DropdownButtonFormField<String>(
-          value: currentValue,
-          isExpanded: true,
-          decoration: InputDecoration(
-            hintText: 'Select a goal (optional)',
-            prefixIcon: const Icon(
-              Icons.flag_outlined,
-              color: Color(0xFF6C63FF),
-            ),
-            filled: true,
-            fillColor: Colors.white,
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
-            enabledBorder: OutlineInputBorder(
+        InkWell(
+          onTap: onSelectGoal,
+          borderRadius: BorderRadius.circular(14),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 15),
+            decoration: BoxDecoration(
+              color: Colors.white,
               borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(color: Color(0xFFE1E4EC)),
+              border: Border.all(color: const Color(0xFFE1E4EC)),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.flag_outlined, color: Color(0xFF6C63FF)),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    selectedGoal?['title'] ?? 'Select a goal (optional)',
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: selectedGoal == null
+                          ? Colors.grey
+                          : const Color(0xFF1B2B4F),
+                      fontWeight: selectedGoal == null
+                          ? FontWeight.normal
+                          : FontWeight.w600,
+                    ),
+                  ),
+                ),
+                const Icon(Icons.chevron_right, color: Color(0xFF9297A5)),
+              ],
             ),
           ),
-          items: [
-            const DropdownMenuItem<String>(value: null, child: Text('No Goal')),
-            ...goals.map((goal) {
-              return DropdownMenuItem<String>(
-                value: goal['id'],
-                child: Text(
-                  goal['title'] ?? 'Untitled Goal',
-                  overflow: TextOverflow.ellipsis,
-                ),
-              );
-            }),
-          ],
-          onChanged: onGoalChanged,
         ),
-        const SizedBox(height: 6),
-        const Text(
-          'Choose a goal to connect this task with it.',
-          style: TextStyle(fontSize: 12, color: Colors.grey),
-        ),
+        if (selectedGoal != null) ...[
+          const SizedBox(height: 6),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: () => onGoalChanged(null),
+              child: const Text(
+                'Remove Goal',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ),
+        ] else
+          const Padding(
+            padding: EdgeInsets.only(top: 6),
+            child: Text(
+              'Choose a goal to connect this task with it.',
+              style: TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+          ),
       ],
     );
   }

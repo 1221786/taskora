@@ -13,7 +13,10 @@ class CalendarViewModel extends ChangeNotifier {
   DateTime _displayedMonth = DateTime.now();
 
   List<TaskModel> _tasks = [];
+
   bool _isLoading = false;
+  bool _isDisposed = false;
+
   String? _errorMessage;
 
   StreamSubscription<List<TaskModel>>? _tasksSubscription;
@@ -52,26 +55,33 @@ class CalendarViewModel extends ChangeNotifier {
   void previousMonth() {
     _displayedMonth = DateTime(_displayedMonth.year, _displayedMonth.month - 1);
 
-    notifyListeners();
+    _notify();
   }
 
   void nextMonth() {
     _displayedMonth = DateTime(_displayedMonth.year, _displayedMonth.month + 1);
 
-    notifyListeners();
+    _notify();
   }
 
   void goToToday() {
-    _selectedDate = DateTime.now();
-    _displayedMonth = DateTime.now();
+    final today = DateTime.now();
 
-    notifyListeners();
+    _selectedDate = today;
+    _displayedMonth = today;
+
+    _notify();
   }
 
   void selectDate(DateTime date) {
     _selectedDate = date;
 
-    notifyListeners();
+    if (date.year != _displayedMonth.year ||
+        date.month != _displayedMonth.month) {
+      _displayedMonth = DateTime(date.year, date.month);
+    }
+
+    _notify();
   }
 
   bool isSelected(DateTime date) {
@@ -108,30 +118,44 @@ class CalendarViewModel extends ChangeNotifier {
 
   String? get errorMessage => _errorMessage;
 
+  // Listen to Firestore tasks
+
   void _listenToTasks() {
     if (_userId == null || _userId.isEmpty) {
       _isLoading = false;
+      _errorMessage = 'Please login to view your tasks.';
       return;
     }
 
     _isLoading = true;
+    _errorMessage = null;
 
     _tasksSubscription = _taskService
         .watchTasks(_userId)
         .listen(
           (tasks) {
+            if (_isDisposed) return;
+
             _tasks = tasks;
             _isLoading = false;
             _errorMessage = null;
-            notifyListeners();
+
+            _notify();
           },
           onError: (error) {
+            if (_isDisposed) return;
+
             _isLoading = false;
             _errorMessage = 'Could not load tasks. Please try again.';
-            notifyListeners();
+
+            debugPrint('CALENDAR TASKS ERROR: $error');
+
+            _notify();
           },
         );
   }
+
+  // Helper methods
 
   bool _isSameDay(DateTime first, DateTime second) {
     return first.year == second.year &&
@@ -139,9 +163,17 @@ class CalendarViewModel extends ChangeNotifier {
         first.day == second.day;
   }
 
+  void _notify() {
+    if (!_isDisposed) {
+      notifyListeners();
+    }
+  }
+
   @override
   void dispose() {
+    _isDisposed = true;
     _tasksSubscription?.cancel();
+
     super.dispose();
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/theme/app_colors.dart';
 
 class ReminderSelector extends StatelessWidget {
   final String selectedReminder;
@@ -25,22 +26,52 @@ class ReminderSelector extends StatelessWidget {
       children: [
         const Text(
           'Reminder',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
+          ),
         ),
 
         const SizedBox(height: 12),
 
         DropdownButtonFormField<String>(
-          value: selectedReminder,
-          decoration: const InputDecoration(
-            border: OutlineInputBorder(),
-            prefixIcon: Icon(Icons.notifications_active_outlined),
+          initialValue: selectedReminder,
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: AppColors.white,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: AppColors.border),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: AppColors.border),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: AppColors.primary,
+                width: 1.5,
+              ),
+            ),
+            prefixIcon: const Icon(
+              Icons.notifications_active_outlined,
+              color: AppColors.primary,
+            ),
             labelText: 'Select Reminder',
+            labelStyle: const TextStyle(color: AppColors.textSecondary),
           ),
+          dropdownColor: AppColors.white,
+          style: const TextStyle(color: AppColors.textPrimary),
+          iconEnabledColor: AppColors.primary,
           items: reminderOptions.entries.map((entry) {
             return DropdownMenuItem<String>(
               value: entry.key,
-              child: Text(entry.value),
+              child: Text(
+                entry.value,
+                style: const TextStyle(color: AppColors.textPrimary),
+              ),
             );
           }).toList(),
           onChanged: (value) {

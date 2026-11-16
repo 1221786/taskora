@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../../core/theme/app_colors.dart';
+
 import 'selected_date_section.dart';
 import 'view_models/calendar_view_model.dart';
 import 'widgets/calendar_header.dart';
@@ -17,12 +19,15 @@ class CalendarView extends StatefulWidget {
 
 class _CalendarViewState extends State<CalendarView> {
   late final CalendarViewModel _viewModel;
+  late final bool _isUserLoggedIn;
 
   @override
   void initState() {
     super.initState();
 
     final userId = FirebaseAuth.instance.currentUser?.uid;
+
+    _isUserLoggedIn = userId != null && userId.isNotEmpty;
 
     _viewModel = CalendarViewModel(userId: userId);
   }
@@ -36,16 +41,17 @@ class _CalendarViewState extends State<CalendarView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FC),
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: ListenableBuilder(
           listenable: _viewModel,
           builder: (context, child) {
             return SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.only(bottom: 20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Calendar Header
                   CalendarHeader(
                     monthName: _viewModel.monthName,
                     year: _viewModel.displayedMonth.year,
@@ -54,10 +60,8 @@ class _CalendarViewState extends State<CalendarView> {
                     onToday: _viewModel.goToToday,
                   ),
 
-                  // Week Days
                   const CalendarWeekDays(),
 
-                  // Calendar Grid
                   CalendarGrid(
                     daysInMonth: _viewModel.daysInMonth,
                     startingWeekday: _viewModel.startingWeekday,
@@ -69,15 +73,24 @@ class _CalendarViewState extends State<CalendarView> {
                     onDateSelected: _viewModel.selectDate,
                   ),
 
-                  // Selected Date
                   SelectedDateSection(selectedDate: _viewModel.selectedDate),
 
-                  // Tasks of Selected Date
-                  SelectedDateTasksSection(
-                    tasks: _viewModel.selectedDateTasks,
-                    isLoading: _viewModel.isLoading,
-                    errorMessage: _viewModel.errorMessage,
-                  ),
+                  if (!_isUserLoggedIn)
+                    const Padding(
+                      padding: EdgeInsets.all(20),
+                      child: Center(
+                        child: Text(
+                          'Please login to view your tasks.',
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    )
+                  else
+                    SelectedDateTasksSection(
+                      tasks: _viewModel.selectedDateTasks,
+                      isLoading: _viewModel.isLoading,
+                      errorMessage: _viewModel.errorMessage,
+                    ),
 
                   const SizedBox(height: 20),
                 ],

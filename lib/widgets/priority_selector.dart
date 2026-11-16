@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/theme/app_colors.dart';
 
 class PrioritySelector extends StatelessWidget {
   final String selectedPriority;
@@ -11,9 +12,9 @@ class PrioritySelector extends StatelessWidget {
   });
 
   static const Map<String, Color> priorityColors = {
-    'low': Color(0xFF4CAF50),
-    'medium': Color(0xFFFFC107),
-    'high': Color(0xFFE53935),
+    'low': AppColors.priorityLow,
+    'medium': AppColors.priorityMedium,
+    'high': AppColors.priorityHigh,
   };
 
   @override
@@ -23,7 +24,11 @@ class PrioritySelector extends StatelessWidget {
       children: [
         const Text(
           'Priority',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
+          ),
         ),
 
         const SizedBox(height: 12),
@@ -49,7 +54,7 @@ class PrioritySelector extends StatelessWidget {
                           : Colors.transparent,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: isSelected ? color : Colors.grey.shade300,
+                        color: isSelected ? color : AppColors.border,
                         width: isSelected ? 2 : 1,
                       ),
                     ),

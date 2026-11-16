@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_colors.dart';
 import '../models/goal_model.dart';
 import 'goal_progress_indicator.dart';
 
@@ -15,6 +16,9 @@ class GoalCard extends StatelessWidget {
   final VoidCallback onDelete;
   final VoidCallback onAddTask;
 
+  final bool isSelectionMode;
+  final VoidCallback? onSelect;
+
   const GoalCard({
     super.key,
     required this.goal,
@@ -26,6 +30,8 @@ class GoalCard extends StatelessWidget {
     required this.onEdit,
     required this.onDelete,
     required this.onAddTask,
+    this.isSelectionMode = false,
+    this.onSelect,
   });
 
   String _formatDate(DateTime date) {
@@ -35,13 +41,13 @@ class GoalCard extends StatelessWidget {
   Color _statusColor() {
     switch (status) {
       case 'Completed':
-        return const Color(0xFF45B77A);
+        return AppColors.success;
       case 'Overdue':
-        return const Color(0xFFE85D5D);
+        return AppColors.danger;
       case 'In Progress':
-        return const Color(0xFF6C63FF);
+        return AppColors.primary;
       default:
-        return const Color(0xFF9297A5);
+        return AppColors.mutedText;
     }
   }
 
@@ -49,166 +55,188 @@ class GoalCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final statusColor = _statusColor();
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE9ECF3)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Goal title and status
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Text(
-                  goal.title,
-                  style: const TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF1B2B4F),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 5,
-                ),
-                decoration: BoxDecoration(
-                  color: statusColor.withValues(alpha: 0.10),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  status,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: statusColor,
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          // Goal description
-          if (goal.description.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            Text(
-              goal.description,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 13,
-                color: Color(0xFF9297A5),
-                height: 1.5,
-              ),
+    return InkWell(
+      onTap: isSelectionMode ? onSelect : null,
+      borderRadius: BorderRadius.circular(18),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: AppColors.cardBackground,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: AppColors.border),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.black.withValues(alpha: 0.03),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
             ),
           ],
-
-          const SizedBox(height: 16),
-
-          // Dates
-          Row(
-            children: [
-              Expanded(
-                child: _DateInfo(
-                  label: 'Start Date',
-                  date: _formatDate(goal.startDate),
-                  icon: Icons.calendar_today_outlined,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(
+                    goal.title,
+                    style: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
                 ),
-              ),
-              Expanded(
-                child: _DateInfo(
-                  label: 'Target Date',
-                  date: _formatDate(goal.targetDate),
-                  icon: Icons.flag_outlined,
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: statusColor.withValues(alpha: 0.10),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    status,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: statusColor,
+                    ),
+                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
 
-          const SizedBox(height: 18),
-
-          // Progress
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Progress',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF1B2B4F),
-                ),
-              ),
+            if (goal.description.isNotEmpty) ...[
+              const SizedBox(height: 8),
               Text(
-                '${(progress * 100).round()}%',
+                goal.description,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF6C63FF),
+                  color: AppColors.textSecondary,
+                  height: 1.5,
                 ),
               ),
             ],
-          ),
 
-          const SizedBox(height: 9),
+            const SizedBox(height: 16),
 
-          GoalProgressIndicator(progress: progress, showPercentage: false),
+            Row(
+              children: [
+                Expanded(
+                  child: _DateInfo(
+                    label: 'Start Date',
+                    date: _formatDate(goal.startDate),
+                    icon: Icons.calendar_today_outlined,
+                  ),
+                ),
+                Expanded(
+                  child: _DateInfo(
+                    label: 'Target Date',
+                    date: _formatDate(goal.targetDate),
+                    icon: Icons.flag_outlined,
+                  ),
+                ),
+              ],
+            ),
 
-          const SizedBox(height: 10),
+            const SizedBox(height: 18),
 
-          Text(
-            '$completedTasks/$totalTasks Tasks Completed',
-            style: const TextStyle(fontSize: 12, color: Color(0xFF9297A5)),
-          ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Progress',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                Text(
+                  '${(progress * 100).round()}%',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ],
+            ),
 
-          const SizedBox(height: 18),
-          const Divider(color: Color(0xFFE9ECF3)),
-          const SizedBox(height: 8),
+            const SizedBox(height: 9),
 
-          // Goal actions
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              _ActionButton(
-                label: 'Details',
-                icon: Icons.visibility_outlined,
-                onTap: onViewDetails,
+            GoalProgressIndicator(progress: progress, showPercentage: false),
+
+            const SizedBox(height: 10),
+
+            Text(
+              '$completedTasks/$totalTasks Tasks Completed',
+              style: const TextStyle(
+                fontSize: 12,
+                color: AppColors.textSecondary,
               ),
-              _ActionButton(
-                label: 'Edit',
-                icon: Icons.edit_outlined,
-                onTap: onEdit,
+            ),
+
+            const SizedBox(height: 18),
+
+            const Divider(color: AppColors.border),
+
+            const SizedBox(height: 8),
+
+            if (isSelectionMode)
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: onSelect,
+                  icon: const Icon(Icons.link, size: 18),
+                  label: const Text('Select This Goal'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+              )
+            else
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  _ActionButton(
+                    label: 'Details',
+                    icon: Icons.visibility_outlined,
+                    onTap: onViewDetails,
+                  ),
+                  _ActionButton(
+                    label: 'Edit',
+                    icon: Icons.edit_outlined,
+                    onTap: onEdit,
+                  ),
+                  _ActionButton(
+                    label: 'Add Task',
+                    icon: Icons.add_task,
+                    onTap: onAddTask,
+                  ),
+                  _ActionButton(
+                    label: 'Delete',
+                    icon: Icons.delete_outline,
+                    color: AppColors.danger,
+                    onTap: onDelete,
+                  ),
+                ],
               ),
-              _ActionButton(
-                label: 'Add Task',
-                icon: Icons.add_task,
-                onTap: onAddTask,
-              ),
-              _ActionButton(
-                label: 'Delete',
-                icon: Icons.delete_outline,
-                color: const Color(0xFFE85D5D),
-                onTap: onDelete,
-              ),
-            ],
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -229,7 +257,7 @@ class _DateInfo extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: const Color(0xFF6C63FF)),
+        Icon(icon, size: 16, color: AppColors.primary),
         const SizedBox(width: 7),
         Expanded(
           child: Column(
@@ -237,7 +265,10 @@ class _DateInfo extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: const TextStyle(fontSize: 11, color: Color(0xFF9297A5)),
+                style: const TextStyle(
+                  fontSize: 11,
+                  color: AppColors.textSecondary,
+                ),
               ),
               const SizedBox(height: 3),
               Text(
@@ -245,7 +276,7 @@ class _DateInfo extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF1B2B4F),
+                  color: AppColors.textPrimary,
                 ),
               ),
             ],
@@ -266,7 +297,7 @@ class _ActionButton extends StatelessWidget {
     required this.label,
     required this.icon,
     required this.onTap,
-    this.color = const Color(0xFF6C63FF),
+    this.color = AppColors.primary,
   });
 
   @override

@@ -168,18 +168,22 @@ class _TaskoraSignupViewState extends State<TaskoraSignupView> {
                     password: passwordController.text,
                   );
 
+                  // Get the required objects before the async operation.
+                  final scaffoldMessenger = ScaffoldMessenger.of(context);
+                  final navigator = Navigator.of(context);
+
                   final errorMessage = await viewModel.signup(model);
 
                   if (!mounted) return;
 
                   if (errorMessage != null) {
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text(errorMessage)));
+                    scaffoldMessenger.showSnackBar(
+                      SnackBar(content: Text(errorMessage)),
+                    );
                     return;
                   }
 
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  scaffoldMessenger.showSnackBar(
                     const SnackBar(
                       content: Text(
                         'Account created successfully! Please log in.',
@@ -187,8 +191,7 @@ class _TaskoraSignupViewState extends State<TaskoraSignupView> {
                     ),
                   );
 
-                  Navigator.pushAndRemoveUntil(
-                    context,
+                  navigator.pushAndRemoveUntil(
                     MaterialPageRoute(
                       builder: (context) => const TaskoraLoginView(),
                     ),

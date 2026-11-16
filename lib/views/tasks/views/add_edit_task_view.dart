@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '/core/theme/app_colors.dart';
 import '/widgets/task_information_section.dart';
 import '/widgets/priority_selector.dart';
 import '/widgets/reminder_selector.dart';
 import '/widgets/estimated_duration_field.dart';
-import '/widgets/goal_selector.dart';
 
 class AddEditTaskView extends StatelessWidget {
   final bool isEditing;
-
   final GlobalKey<FormState> formKey;
 
   final TextEditingController titleController;
@@ -21,15 +20,12 @@ class AddEditTaskView extends StatelessWidget {
 
   final String selectedPriority;
   final String selectedReminder;
-  final String? selectedGoalId;
-
-  final List<Map<String, String>> goals;
 
   final VoidCallback onSelectDate;
   final VoidCallback onSelectTime;
+
   final ValueChanged<String> onPriorityChanged;
   final ValueChanged<String> onReminderChanged;
-  final ValueChanged<String?> onGoalChanged;
 
   final VoidCallback onSave;
   final VoidCallback onCancel;
@@ -46,13 +42,10 @@ class AddEditTaskView extends StatelessWidget {
     required this.selectedTime,
     required this.selectedPriority,
     required this.selectedReminder,
-    required this.selectedGoalId,
-    required this.goals,
     required this.onSelectDate,
     required this.onSelectTime,
     required this.onPriorityChanged,
     required this.onReminderChanged,
-    required this.onGoalChanged,
     required this.onSave,
     required this.onCancel,
   });
@@ -66,20 +59,28 @@ class AddEditTaskView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text(isEditing ? 'Edit Task' : 'Add New Task'),
+        backgroundColor: AppColors.white,
+        foregroundColor: AppColors.textPrimary,
+        elevation: 0,
+        title: Text(
+          isEditing ? 'Edit Task' : 'Add New Task',
+          style: const TextStyle(
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
+          color: AppColors.textPrimary,
           onPressed: onCancel,
         ),
       ),
-
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
-
         child: Form(
           key: formKey,
-
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -111,14 +112,6 @@ class AddEditTaskView extends StatelessWidget {
                 onReminderChanged: onReminderChanged,
               ),
 
-              const SizedBox(height: 24),
-
-              GoalSelector(
-                selectedGoalId: selectedGoalId,
-                goals: goals,
-                onGoalChanged: onGoalChanged,
-              ),
-
               const SizedBox(height: 32),
 
               SizedBox(
@@ -126,6 +119,14 @@ class AddEditTaskView extends StatelessWidget {
                 height: 55,
                 child: ElevatedButton(
                   onPressed: _handleSave,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
                   child: Text(
                     isEditing ? 'Update Task' : 'Save Task',
                     style: const TextStyle(
@@ -143,6 +144,13 @@ class AddEditTaskView extends StatelessWidget {
                 height: 55,
                 child: OutlinedButton(
                   onPressed: onCancel,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                    side: const BorderSide(color: AppColors.primary),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
                   child: const Text('Cancel'),
                 ),
               ),

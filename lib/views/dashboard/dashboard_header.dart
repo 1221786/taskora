@@ -1,70 +1,108 @@
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
+import '../../core/theme/app_colors.dart';
+
 class DashboardHeader extends StatelessWidget {
   final VoidCallback onLogout;
+  final VoidCallback onNotificationsTap;
+  final String name;
+  final String? photoBase64;
 
   const DashboardHeader({
     super.key,
     required this.onLogout,
+    required this.onNotificationsTap,
+    required this.name,
+    this.photoBase64,
   });
+
+  String get greeting {
+    final hour = DateTime.now().hour;
+
+    if (hour < 12) return 'Good Morning,';
+    if (hour < 17) return 'Good Afternoon,';
+
+    return 'Good Evening,';
+  }
+
+  Widget _buildAvatar() {
+    ImageProvider? image;
+
+    if (photoBase64 != null && photoBase64!.isNotEmpty) {
+      try {
+        image = MemoryImage(base64Decode(photoBase64!));
+      } catch (_) {
+        image = null;
+      }
+    }
+
+    return CircleAvatar(
+      radius: 25,
+      backgroundColor: AppColors.primaryLight.withValues(alpha: 0.15),
+      backgroundImage: image,
+      child: image == null
+          ? Text(
+              name.isNotEmpty ? name[0].toUpperCase() : 'S',
+              style: const TextStyle(
+                color: AppColors.primary,
+                fontSize: 21,
+                fontWeight: FontWeight.bold,
+              ),
+            )
+          : null,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        CircleAvatar(
-          radius: 25,
-          backgroundColor: const Color(0xFFE9E6FF),
-          child: const Text(
-            'S',
-            style: TextStyle(
-              color: Color(0xFF6C63FF),
-              fontSize: 21,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
+        _buildAvatar(),
 
         const SizedBox(width: 12),
 
-        const Expanded(
+        Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Good Morning,',
-                style: TextStyle(
+                greeting,
+                style: const TextStyle(
                   fontSize: 13,
-                  color: Color(0xFF9297A5),
+                  color: AppColors.mutedText,
                 ),
               ),
-              SizedBox(height: 3),
+
+              const SizedBox(height: 3),
+
               Text(
-                'Sara 👋',
-                style: TextStyle(
+                '${name.isNotEmpty ? name : 'Student'} 👋',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
                   fontSize: 21,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF1B2B4F),
+                  color: AppColors.textPrimary,
                 ),
               ),
-              SizedBox(height: 3),
-              Text(
+
+              const SizedBox(height: 3),
+
+              const Text(
                 "Let's make today productive!",
-                style: TextStyle(
-                  fontSize: 11,
-                  color: Color(0xFF9297A5),
-                ),
+                style: TextStyle(fontSize: 11, color: AppColors.mutedText),
               ),
             ],
           ),
         ),
 
         IconButton(
-          onPressed: () {},
+          onPressed: onNotificationsTap,
           icon: const Icon(
             Icons.notifications_none_rounded,
-            color: Color(0xFF1B2B4F),
+            color: AppColors.primary,
             size: 25,
           ),
         ),
@@ -73,7 +111,7 @@ class DashboardHeader extends StatelessWidget {
           onPressed: onLogout,
           icon: const Icon(
             Icons.logout_rounded,
-            color: Color(0xFF1B2B4F),
+            color: AppColors.textSecondary,
             size: 22,
           ),
         ),

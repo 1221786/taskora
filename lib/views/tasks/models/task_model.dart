@@ -14,6 +14,7 @@ class TaskModel {
   final String userId;
   final DateTime? createdAt;
   final DateTime? updatedAt;
+  final DateTime? completedAt;
 
   const TaskModel({
     required this.id,
@@ -29,11 +30,11 @@ class TaskModel {
     required this.userId,
     this.createdAt,
     this.updatedAt,
+    this.completedAt,
   });
 
-  // Convert TaskModel to Firestore Map
   Map<String, dynamic> toMap() {
-    return {
+    final Map<String, dynamic> data = {
       'title': title,
       'description': description,
       'subject': subject,
@@ -49,9 +50,14 @@ class TaskModel {
           : FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),
     };
+
+    if (completedAt != null) {
+      data['completedAt'] = Timestamp.fromDate(completedAt!);
+    }
+
+    return data;
   }
 
-  // Create TaskModel from Firestore Map
   factory TaskModel.fromMap(Map<String, dynamic> map, String documentId) {
     return TaskModel(
       id: documentId,
@@ -70,6 +76,9 @@ class TaskModel {
           : null,
       updatedAt: map['updatedAt'] is Timestamp
           ? (map['updatedAt'] as Timestamp).toDate()
+          : null,
+      completedAt: map['completedAt'] is Timestamp
+          ? (map['completedAt'] as Timestamp).toDate()
           : null,
     );
   }

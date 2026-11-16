@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../core/theme/app_colors.dart';
+
 class UpcomingTaskCard extends StatelessWidget {
   final String title;
   final String subject;
@@ -21,11 +23,11 @@ class UpcomingTaskCard extends StatelessWidget {
   Color get priorityColor {
     switch (priority.toLowerCase()) {
       case 'high':
-        return const Color(0xFFEF5350);
+        return AppColors.priorityHigh;
       case 'medium':
-        return const Color(0xFFF5B942);
+        return AppColors.priorityMedium;
       default:
-        return const Color(0xFF43B581);
+        return AppColors.priorityLow;
     }
   }
 
@@ -36,12 +38,10 @@ class UpcomingTaskCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.cardBackground,
           borderRadius: BorderRadius.circular(17),
           border: Border.all(
-            color: isOverdue
-                ? const Color(0xFFF5DADA)
-                : const Color(0xFFEDEEF3),
+            color: isOverdue ? AppColors.overdueBorder : AppColors.border,
           ),
         ),
         child: Row(
@@ -51,17 +51,15 @@ class UpcomingTaskCard extends StatelessWidget {
               height: 43,
               decoration: BoxDecoration(
                 color: isOverdue
-                    ? const Color(0xFFFCEAEA)
-                    : const Color(0xFFECEAFF),
+                    ? AppColors.overdueBackground
+                    : AppColors.primaryLight.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
                 isOverdue
                     ? Icons.warning_amber_rounded
                     : Icons.calendar_today_rounded,
-                color: isOverdue
-                    ? const Color(0xFFE17C7C)
-                    : const Color(0xFF6C63FF),
+                color: isOverdue ? AppColors.danger : AppColors.primary,
                 size: 20,
               ),
             ),
@@ -79,7 +77,7 @@ class UpcomingTaskCard extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF1B2B4F),
+                      color: AppColors.textPrimary,
                     ),
                   ),
 
@@ -89,7 +87,7 @@ class UpcomingTaskCard extends StatelessWidget {
                     subject,
                     style: const TextStyle(
                       fontSize: 10,
-                      color: Color(0xFF9297A5),
+                      color: AppColors.mutedText,
                     ),
                   ),
 
@@ -101,8 +99,8 @@ class UpcomingTaskCard extends StatelessWidget {
                         Icons.calendar_month_rounded,
                         size: 12,
                         color: isOverdue
-                            ? const Color(0xFFE17C7C)
-                            : const Color(0xFF9297A5),
+                            ? AppColors.danger
+                            : AppColors.mutedText,
                       ),
 
                       const SizedBox(width: 4),
@@ -113,8 +111,8 @@ class UpcomingTaskCard extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 10,
                             color: isOverdue
-                                ? const Color(0xFFE17C7C)
-                                : const Color(0xFF9297A5),
+                                ? AppColors.danger
+                                : AppColors.mutedText,
                           ),
                         ),
                       ),
@@ -154,7 +152,7 @@ class UpcomingTaskCard extends StatelessWidget {
                   const Text(
                     'Overdue',
                     style: TextStyle(
-                      color: Color(0xFFE17C7C),
+                      color: AppColors.danger,
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
                     ),
@@ -163,7 +161,7 @@ class UpcomingTaskCard extends StatelessWidget {
                   const Icon(
                     Icons.arrow_forward_ios_rounded,
                     size: 13,
-                    color: Color(0xFFB0B3C0),
+                    color: AppColors.primary,
                   ),
               ],
             ),

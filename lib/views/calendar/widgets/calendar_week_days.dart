@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_colors.dart';
+
 class CalendarWeekDays extends StatelessWidget {
   const CalendarWeekDays({super.key});
 
@@ -26,7 +28,7 @@ class CalendarWeekDays extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF8A94A6),
+                  color: AppColors.textSecondary,
                 ),
               ),
             ),

@@ -1,9 +1,31 @@
 import 'package:flutter/material.dart';
+
+import '../../core/theme/app_colors.dart';
 import '../../widgets/task_card.dart';
+import '../tasks/models/task_model.dart';
 import '../tasks/tasks_view.dart';
 
 class TodayTasksSection extends StatelessWidget {
-  const TodayTasksSection({super.key});
+  final List<TaskModel> tasks;
+  final bool isLoading;
+  final void Function(TaskModel task) onToggle;
+  final void Function(String taskId) onDelete;
+
+  const TodayTasksSection({
+    super.key,
+    required this.tasks,
+    required this.isLoading,
+    required this.onToggle,
+    required this.onDelete,
+  });
+
+  String _formatTime(DateTime date) {
+    final hour = date.hour % 12 == 0 ? 12 : date.hour % 12;
+    final minute = date.minute.toString().padLeft(2, '0');
+    final period = date.hour >= 12 ? 'PM' : 'AM';
+
+    return '$hour:$minute $period';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +40,7 @@ class TodayTasksSection extends StatelessWidget {
               style: TextStyle(
                 fontSize: 17,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF1B2B4F),
+                color: AppColors.textPrimary,
               ),
             ),
 
@@ -31,7 +53,7 @@ class TodayTasksSection extends StatelessWidget {
               },
               child: const Text(
                 'See All →',
-                style: TextStyle(fontSize: 12, color: Color(0xFF6C63FF)),
+                style: TextStyle(fontSize: 12, color: AppColors.primary),
               ),
             ),
           ],
@@ -39,62 +61,55 @@ class TodayTasksSection extends StatelessWidget {
 
         const SizedBox(height: 10),
 
-        const TaskCard(
-          title: 'Mobile Assignment',
-          subject: 'Mobile Development',
-          priority: 'High',
-          dueTime: '06:00 PM',
-        ),
-
-        const SizedBox(height: 12),
-
-        const TaskCard(
-          title: 'Database Assignment',
-          subject: 'Database',
-          priority: 'Medium',
-          dueTime: '08:00 PM',
-        ),
-
-        const SizedBox(height: 12),
-
-        const TaskCard(
-          title: 'Study Chapter 4',
-          subject: 'Software Engineering',
-          priority: 'Low',
-          dueTime: '09:00 PM',
-          isCompleted: true,
-        ),
-
-        const SizedBox(height: 12),
-
-        const TaskCard(
-          title: 'Flutter Practice',
-          subject: 'Mobile Development',
-          priority: 'Medium',
-          dueTime: '10:00 PM',
-          isCompleted: true,
-        ),
-
-        const SizedBox(height: 12),
-
-        const TaskCard(
-          title: 'Review Lecture Notes',
-          subject: 'Computer Science',
-          priority: 'Low',
-          dueTime: '11:00 PM',
-          isCompleted: true,
-        ),
-
-        const SizedBox(height: 12),
-
-        const TaskCard(
-          title: 'Prepare Presentation',
-          subject: 'University Project',
-          priority: 'High',
-          dueTime: '11:30 PM',
-          isCompleted: true,
-        ),
+        if (isLoading)
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.all(20),
+              child: CircularProgressIndicator(color: AppColors.primary),
+            ),
+          )
+        else if (tasks.isEmpty)
+          const _EmptyTasksMessage(message: 'No tasks scheduled for today.')
+        else
+          ...tasks.map(
+            (task) => Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: TaskCard(
+                title: task.title,
+                subject: task.subject,
+                priority: task.priority,
+                dueTime: _formatTime(task.dueDate),
+                isCompleted: task.isCompleted,
+                onCheckboxTap: () => onToggle(task),
+                onDelete: () => onDelete(task.id),
+              ),
+            ),
+          ),
       ],
+    );
+  }
+}
+
+class _EmptyTasksMessage extends StatelessWidget {
+  final String message;
+
+  const _EmptyTasksMessage({required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Text(
+        message,
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+      ),
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/theme/app_colors.dart';
 
 class TaskSortDropdown extends StatelessWidget {
   final String selectedValue;
@@ -22,19 +23,25 @@ class TaskSortDropdown extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE8EAF0)),
+        border: Border.all(color: AppColors.border),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: selectedValue,
           isExpanded: true,
-          icon: const Icon(Icons.keyboard_arrow_down, color: Color(0xFF6C63FF)),
+          icon: const Icon(Icons.keyboard_arrow_down, color: AppColors.primary),
           items: options.map((option) {
             return DropdownMenuItem<String>(
               value: option,
-              child: Text(option, style: const TextStyle(fontSize: 13)),
+              child: Text(
+                option,
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: AppColors.textPrimary,
+                ),
+              ),
             );
           }).toList(),
           onChanged: onChanged,

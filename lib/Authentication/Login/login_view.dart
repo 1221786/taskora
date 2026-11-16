@@ -159,19 +159,22 @@ class _TaskoraLoginViewState extends State<TaskoraLoginView> {
                     password: passwordController.text,
                   );
 
+                  // Get the required objects before the async operation.
+                  final scaffoldMessenger = ScaffoldMessenger.of(context);
+                  final navigator = Navigator.of(context);
+
                   final errorMessage = await viewModel.login(model);
 
                   if (!mounted) return;
 
                   if (errorMessage != null) {
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text(errorMessage)));
+                    scaffoldMessenger.showSnackBar(
+                      SnackBar(content: Text(errorMessage)),
+                    );
                     return;
                   }
 
-                  Navigator.pushReplacement(
-                    context,
+                  navigator.pushReplacement(
                     MaterialPageRoute(
                       builder: (context) => const TaskoraDashboardView(),
                     ),

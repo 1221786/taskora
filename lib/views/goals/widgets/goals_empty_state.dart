@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/app_colors.dart';
 
 class GoalsEmptyState extends StatelessWidget {
   final VoidCallback onAddGoal;
@@ -17,13 +18,13 @@ class GoalsEmptyState extends StatelessWidget {
               width: 110,
               height: 110,
               decoration: BoxDecoration(
-                color: const Color(0xFF6C63FF).withValues(alpha: 0.08),
+                color: AppColors.primary.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
                 Icons.flag_outlined,
                 size: 52,
-                color: Color(0xFF6C63FF),
+                color: AppColors.primary,
               ),
             ),
 
@@ -34,7 +35,7 @@ class GoalsEmptyState extends StatelessWidget {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF1B2B4F),
+                color: AppColors.textPrimary,
               ),
             ),
 
@@ -47,7 +48,7 @@ class GoalsEmptyState extends StatelessWidget {
               style: TextStyle(
                 fontSize: 14,
                 height: 1.6,
-                color: Color(0xFF9297A5),
+                color: AppColors.textSecondary,
               ),
             ),
 
@@ -58,8 +59,8 @@ class GoalsEmptyState extends StatelessWidget {
               icon: const Icon(Icons.add),
               label: const Text('Create Your First Goal'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF6C63FF),
-                foregroundColor: Colors.white,
+                backgroundColor: AppColors.primary,
+                foregroundColor: AppColors.white,
                 elevation: 0,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 22,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
+import 'package:taskora/core/theme/app_colors.dart';
 import '../models/goal_model.dart';
 import '../view_models/add_edit_goal_view_model.dart';
 
@@ -56,10 +56,15 @@ class _AddEditGoalViewState extends State<AddEditGoalView> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.light(
-              primary: Color(0xFF6C63FF),
-              onPrimary: Colors.white,
-              surface: Colors.white,
-              onSurface: Color(0xFF1B2B4F),
+              primary: AppColors.primary,
+              onPrimary: AppColors.white,
+              secondary: AppColors.secondary,
+              onSecondary: AppColors.white,
+              surface: AppColors.white,
+              onSurface: AppColors.textPrimary,
+            ),
+            dialogTheme: const DialogThemeData(
+              backgroundColor: AppColors.white,
             ),
           ),
           child: child!,
@@ -81,13 +86,14 @@ class _AddEditGoalViewState extends State<AddEditGoalView> {
   }
 
   Future<void> _saveGoal() async {
-    final success = await _viewModel.saveGoal();
+    final savedGoal = await _viewModel.saveGoal();
 
     if (!mounted) return;
 
-    if (success) {
+    if (savedGoal != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
+          backgroundColor: AppColors.success,
           content: Text(
             _viewModel.isEditing
                 ? 'Goal updated successfully.'
@@ -96,7 +102,7 @@ class _AddEditGoalViewState extends State<AddEditGoalView> {
         ),
       );
 
-      Navigator.pop(context);
+      Navigator.pop(context, savedGoal);
     }
   }
 
@@ -115,7 +121,7 @@ class _AddEditGoalViewState extends State<AddEditGoalView> {
           style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF1B2B4F),
+            color: AppColors.textPrimary,
           ),
         ),
         const SizedBox(height: 9),
@@ -123,24 +129,28 @@ class _AddEditGoalViewState extends State<AddEditGoalView> {
           controller: controller,
           onChanged: onChanged,
           maxLines: maxLines,
+          style: const TextStyle(color: AppColors.textPrimary),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: const TextStyle(color: Color(0xFFB0B5C0), fontSize: 13),
+            hintStyle: const TextStyle(
+              color: AppColors.mutedText,
+              fontSize: 13,
+            ),
             filled: true,
-            fillColor: Colors.white,
+            fillColor: AppColors.white,
             contentPadding: const EdgeInsets.all(15),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(13),
-              borderSide: const BorderSide(color: Color(0xFFE5E8EF)),
+              borderSide: const BorderSide(color: AppColors.border),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(13),
-              borderSide: const BorderSide(color: Color(0xFFE5E8EF)),
+              borderSide: const BorderSide(color: AppColors.border),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(13),
               borderSide: const BorderSide(
-                color: Color(0xFF6C63FF),
+                color: AppColors.primary,
                 width: 1.5,
               ),
             ),
@@ -164,7 +174,7 @@ class _AddEditGoalViewState extends State<AddEditGoalView> {
           style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF1B2B4F),
+            color: AppColors.textPrimary,
           ),
         ),
         const SizedBox(height: 9),
@@ -174,24 +184,27 @@ class _AddEditGoalViewState extends State<AddEditGoalView> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.white,
               borderRadius: BorderRadius.circular(13),
-              border: Border.all(color: const Color(0xFFE5E8EF)),
+              border: Border.all(color: AppColors.border),
             ),
             child: Row(
               children: [
-                Icon(icon, size: 18, color: const Color(0xFF6C63FF)),
+                Icon(icon, size: 18, color: AppColors.primary),
                 const SizedBox(width: 9),
                 Expanded(
                   child: Text(
                     _formatDate(date),
                     style: const TextStyle(
                       fontSize: 13,
-                      color: Color(0xFF1B2B4F),
+                      color: AppColors.textPrimary,
                     ),
                   ),
                 ),
-                const Icon(Icons.keyboard_arrow_down, color: Color(0xFF9297A5)),
+                const Icon(
+                  Icons.keyboard_arrow_down,
+                  color: AppColors.mutedText,
+                ),
               ],
             ),
           ),
@@ -203,19 +216,19 @@ class _AddEditGoalViewState extends State<AddEditGoalView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FC),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF8F9FC),
+        backgroundColor: AppColors.background,
         elevation: 0,
         title: Text(
           _viewModel.isEditing ? 'Edit Goal' : 'Create Goal',
           style: const TextStyle(
-            color: Color(0xFF1B2B4F),
+            color: AppColors.textPrimary,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
         ),
-        iconTheme: const IconThemeData(color: Color(0xFF1B2B4F)),
+        iconTheme: const IconThemeData(color: AppColors.textPrimary),
       ),
       body: ListenableBuilder(
         listenable: _viewModel,
@@ -264,7 +277,10 @@ class _AddEditGoalViewState extends State<AddEditGoalView> {
                   const SizedBox(height: 16),
                   Text(
                     _viewModel.errorMessage!,
-                    style: const TextStyle(color: Colors.red, fontSize: 13),
+                    style: const TextStyle(
+                      color: AppColors.danger,
+                      fontSize: 13,
+                    ),
                   ),
                 ],
 
@@ -276,8 +292,9 @@ class _AddEditGoalViewState extends State<AddEditGoalView> {
                   child: ElevatedButton(
                     onPressed: _viewModel.isLoading ? null : _saveGoal,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF6C63FF),
-                      foregroundColor: Colors.white,
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: AppColors.white,
+                      disabledBackgroundColor: AppColors.primaryLight,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
@@ -289,7 +306,7 @@ class _AddEditGoalViewState extends State<AddEditGoalView> {
                             height: 22,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: Colors.white,
+                              color: AppColors.white,
                             ),
                           )
                         : Text(

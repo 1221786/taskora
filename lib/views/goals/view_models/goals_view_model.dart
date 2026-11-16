@@ -1,18 +1,24 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 
 import '../models/goal_model.dart';
 import '../services/goal_service.dart';
 import '../../tasks/models/task_model.dart';
+import '../../notifications/models/notification_model.dart';
+import '../../notifications/services/notification_service.dart';
 
 class GoalsViewModel extends ChangeNotifier {
   final GoalService _goalService;
+  final NotificationService _notificationService;
   final String? _userId;
 
-  GoalsViewModel({required String? userId, GoalService? goalService})
-    : _userId = userId,
-      _goalService = goalService ?? GoalService() {
+  GoalsViewModel({
+    required String? userId,
+    GoalService? goalService,
+    NotificationService? notificationService,
+  }) : _userId = userId,
+       _goalService = goalService ?? GoalService(),
+       _notificationService = notificationService ?? NotificationService() {
     _listenToGoals();
   }
 
@@ -20,6 +26,7 @@ class GoalsViewModel extends ChangeNotifier {
   final Map<String, List<TaskModel>> _goalTasks = {};
 
   StreamSubscription<List<GoalModel>>? _goalsSubscription;
+
   final Map<String, StreamSubscription<List<TaskModel>>> _taskSubscriptions =
       {};
 
@@ -30,6 +37,7 @@ class GoalsViewModel extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
+  // Listen to user's goals.
   void _listenToGoals() {
     final userId = _userId;
 
@@ -55,10 +63,12 @@ class GoalsViewModel extends ChangeNotifier {
             _isLoading = false;
             _errorMessage = 'Could not load goals. Please try again.';
             notifyListeners();
+            debugPrint('LOAD GOALS ERROR: $error');
           },
         );
   }
 
+  // Synchronize task subscriptions for each goal.
   void _syncGoalTaskSubscriptions(String userId) {
     final goalIds = _goals.map((goal) => goal.id).toSet();
 
@@ -85,6 +95,7 @@ class GoalsViewModel extends ChangeNotifier {
             onError: (error) {
               _errorMessage = 'Could not load goal tasks.';
               notifyListeners();
+              debugPrint('LOAD GOAL TASKS ERROR: $error');
             },
           );
 
@@ -147,6 +158,25 @@ class GoalsViewModel extends ChangeNotifier {
     return 'In Progress';
   }
 
+  // Save goal deletion activity notification.
+  Future<void> _saveGoalDeletionNotification(GoalModel goal) async {
+    final notification = NotificationModel(
+      id: 'goal_${goal.id}_deleted_${DateTime.now().microsecondsSinceEpoch}',
+      userId: goal.userId,
+      title: 'Goal Deleted',
+      body: 'Your goal "${goal.title}" was deleted.',
+      type: NotificationType.general,
+      goalId: goal.id,
+      createdAt: DateTime.now(),
+    );
+
+    try {
+      await _notificationService.saveAndShowNotification(notification);
+    } catch (error) {
+      debugPrint('GOAL DELETION NOTIFICATION ERROR: $error');
+    }
+  }
+
   // Delete goal.
   Future<bool> deleteGoal(String goalId) async {
     final userId = _userId;
@@ -158,12 +188,41 @@ class GoalsViewModel extends ChangeNotifier {
     }
 
     try {
+      // Find the goal before deleting it.
+      GoalModel? goalToDelete;
+
+      for (final goal in _goals) {
+        if (goal.id == goalId) {
+          goalToDelete = goal;
+          break;
+        }
+      }
+
+      if (goalToDelete == null) {
+        _errorMessage = 'Goal not found. Please refresh and try again.';
+        notifyListeners();
+        return false;
+      }
+
+      // Delete the goal and detach its linked tasks.
       await _goalService.deleteGoal(goalId: goalId, userId: userId);
 
+      // Cancel its scheduled local reminder.
+      try {
+        await _notificationService.cancelGoalReminder(goalToDelete);
+      } catch (error) {
+        debugPrint('CANCEL GOAL REMINDER ERROR: $error');
+      }
+
+      // Notify the user that the goal was deleted.
+      await _saveGoalDeletionNotification(goalToDelete);
+
+      _errorMessage = null;
       return true;
     } catch (error) {
       _errorMessage = 'Could not delete goal. Please try again.';
       notifyListeners();
+      debugPrint('DELETE GOAL ERROR: $error');
       return false;
     }
   }
@@ -177,6 +236,8 @@ class GoalsViewModel extends ChangeNotifier {
     }
 
     _taskSubscriptions.clear();
+    _goalTasks.clear();
+
     super.dispose();
   }
 }

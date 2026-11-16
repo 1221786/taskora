@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/app_colors.dart';
 import '../../widgets/task_sort_dropdown.dart';
 
 class TasksSortSection extends StatelessWidget {
@@ -21,7 +22,7 @@ class TasksSortSection extends StatelessWidget {
           style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF1B2B4F),
+            color: AppColors.textPrimary,
           ),
         ),
 

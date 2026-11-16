@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/app_colors.dart';
 
 class GoalProgressIndicator extends StatelessWidget {
   final double progress;
@@ -14,7 +15,7 @@ class GoalProgressIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final normalizedProgress = progress.clamp(0.0, 1.0);
+    final normalizedProgress = progress.clamp(0.0, 1.0).toDouble();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -27,17 +28,18 @@ class GoalProgressIndicator extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF1B2B4F),
+                color: AppColors.textPrimary,
               ),
             ),
           ),
+
         ClipRRect(
           borderRadius: BorderRadius.circular(20),
           child: LinearProgressIndicator(
             value: normalizedProgress,
             minHeight: height,
-            backgroundColor: const Color(0xFFE9ECF3),
-            valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF6C63FF)),
+            backgroundColor: AppColors.progressBackground,
+            valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
           ),
         ),
       ],

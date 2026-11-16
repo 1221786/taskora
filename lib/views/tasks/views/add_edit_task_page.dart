@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import '../models/task_model.dart';
 import '../view_models/add_edit_task_view_model.dart';
 import 'add_edit_task_view.dart';
-import 'package:flutter/foundation.dart';
 
 class AddEditTaskPage extends StatefulWidget {
   final String userId;
   final TaskModel? task;
-  final List<Map<String, String>> goals;
+  final String? initialGoalId;
+
   final Future<void> Function(TaskModel task) onSaveTask;
 
   const AddEditTaskPage({
@@ -16,7 +16,7 @@ class AddEditTaskPage extends StatefulWidget {
     required this.userId,
     required this.onSaveTask,
     this.task,
-    this.goals = const [],
+    this.initialGoalId,
   });
 
   @override
@@ -30,10 +30,10 @@ class _AddEditTaskPageState extends State<AddEditTaskPage> {
   void initState() {
     super.initState();
 
-    viewModel = AddEditTaskViewModel(task: widget.task);
-
-    // Load the current user's goals from Firestore.
-    viewModel.loadGoals(widget.userId);
+    viewModel = AddEditTaskViewModel(
+      task: widget.task,
+      initialGoalId: widget.initialGoalId,
+    );
   }
 
   Future<void> _saveTask() async {
@@ -75,39 +75,26 @@ class _AddEditTaskPageState extends State<AddEditTaskPage> {
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: viewModel,
-
       builder: (context, child) {
         return AddEditTaskView(
           isEditing: widget.task != null,
-
           formKey: viewModel.formKey,
-
           titleController: viewModel.titleController,
           descriptionController: viewModel.descriptionController,
           subjectController: viewModel.subjectController,
           durationController: viewModel.durationController,
-
           selectedDate: viewModel.selectedDate,
           selectedTime: viewModel.selectedTime,
-
           selectedPriority: viewModel.selectedPriority,
           selectedReminder: viewModel.selectedReminder,
-          selectedGoalId: viewModel.selectedGoalId,
-
-          goals: viewModel.goals,
-
           onSelectDate: () {
             viewModel.selectDate(context);
           },
-
           onSelectTime: () {
             viewModel.selectTime(context);
           },
-
           onPriorityChanged: viewModel.changePriority,
           onReminderChanged: viewModel.changeReminder,
-          onGoalChanged: viewModel.changeGoal,
-
           onSave: _saveTask,
           onCancel: () => Navigator.pop(context),
         );

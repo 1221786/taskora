@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../../../core/theme/app_colors.dart';
 import '../models/goal_model.dart';
 import '../view_models/goals_view_model.dart';
 import '../widgets/goal_card.dart';
@@ -9,7 +10,9 @@ import 'add_edit_goal_view.dart';
 import 'goal_details_view.dart';
 
 class GoalsView extends StatefulWidget {
-  const GoalsView({super.key});
+  final bool isSelectionMode;
+
+  const GoalsView({super.key, this.isSelectionMode = false});
 
   @override
   State<GoalsView> createState() => _GoalsViewState();
@@ -21,9 +24,7 @@ class _GoalsViewState extends State<GoalsView> {
   @override
   void initState() {
     super.initState();
-
     final userId = FirebaseAuth.instance.currentUser?.uid;
-
     _viewModel = GoalsViewModel(userId: userId);
   }
 
@@ -54,25 +55,41 @@ class _GoalsViewState extends State<GoalsView> {
     );
   }
 
+  void _selectGoal(GoalModel goal) {
+    Navigator.pop(context, goal);
+  }
+
   Future<void> _deleteGoal(GoalModel goal) async {
     final shouldDelete = await showDialog<bool>(
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Text('Delete Goal'),
-          content: Text('Are you sure you want to delete "${goal.title}"?'),
+          title: const Text(
+            'Delete Goal',
+            style: TextStyle(color: AppColors.textPrimary),
+          ),
+          content: Text(
+            'Are you sure you want to delete "${goal.title}"?',
+            style: const TextStyle(color: AppColors.textSecondary),
+          ),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.pop(dialogContext, false);
               },
-              child: const Text('Cancel'),
+              child: const Text(
+                'Cancel',
+                style: TextStyle(color: AppColors.textSecondary),
+              ),
             ),
             TextButton(
               onPressed: () {
                 Navigator.pop(dialogContext, true);
               },
-              child: const Text('Delete', style: TextStyle(color: Colors.red)),
+              child: const Text(
+                'Delete',
+                style: TextStyle(color: AppColors.danger),
+              ),
             ),
           ],
         );
@@ -87,6 +104,7 @@ class _GoalsViewState extends State<GoalsView> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
+        backgroundColor: success ? AppColors.success : AppColors.danger,
         content: Text(
           success
               ? 'Goal deleted successfully.'
@@ -101,13 +119,13 @@ class _GoalsViewState extends State<GoalsView> {
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
       child: Row(
         children: [
-          const Expanded(
+          Expanded(
             child: Text(
-              'My Goals',
-              style: TextStyle(
+              widget.isSelectionMode ? 'Select a Goal' : 'My Goals',
+              style: const TextStyle(
                 fontSize: 26,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF1B2B4F),
+                color: AppColors.textPrimary,
               ),
             ),
           ),
@@ -116,8 +134,8 @@ class _GoalsViewState extends State<GoalsView> {
             icon: const Icon(Icons.add, size: 19),
             label: const Text('Add Goal'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF6C63FF),
-              foregroundColor: Colors.white,
+              backgroundColor: AppColors.primary,
+              foregroundColor: AppColors.white,
               elevation: 0,
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               shape: RoundedRectangleBorder(
@@ -136,7 +154,7 @@ class _GoalsViewState extends State<GoalsView> {
     if (_viewModel.isLoading && goals.isEmpty) {
       return const Expanded(
         child: Center(
-          child: CircularProgressIndicator(color: Color(0xFF6C63FF)),
+          child: CircularProgressIndicator(color: AppColors.primary),
         ),
       );
     }
@@ -149,7 +167,7 @@ class _GoalsViewState extends State<GoalsView> {
             child: Text(
               _viewModel.errorMessage!,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.red),
+              style: const TextStyle(color: AppColors.danger),
             ),
           ),
         ),
@@ -173,6 +191,8 @@ class _GoalsViewState extends State<GoalsView> {
             completedTasks: _viewModel.completedTasksCount(goal.id),
             totalTasks: _viewModel.totalTasksCount(goal.id),
             status: _viewModel.goalStatus(goal),
+            isSelectionMode: widget.isSelectionMode,
+            onSelect: () => _selectGoal(goal),
             onViewDetails: () => _openGoalDetails(goal),
             onEdit: () => _openEditGoal(goal),
             onDelete: () => _deleteGoal(goal),
@@ -186,7 +206,7 @@ class _GoalsViewState extends State<GoalsView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FC),
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: ListenableBuilder(
           listenable: _viewModel,

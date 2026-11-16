@@ -1,58 +1,47 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 
 import '../models/task_model.dart';
-import '../../goals/models/goal_model.dart';
-import '../../goals/services/goal_service.dart';
 
 class AddEditTaskViewModel extends ChangeNotifier {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   final TextEditingController titleController = TextEditingController();
+
   final TextEditingController descriptionController = TextEditingController();
+
   final TextEditingController subjectController = TextEditingController();
+
   final TextEditingController durationController = TextEditingController();
 
-  final GoalService _goalService;
-
-  AddEditTaskViewModel({TaskModel? task, GoalService? goalService})
-    : _goalService = goalService ?? GoalService() {
+  AddEditTaskViewModel({TaskModel? task, String? initialGoalId}) {
     if (task != null) {
       _loadTask(task);
+    } else {
+      selectedGoalId = initialGoalId;
     }
   }
 
-  // Task Information
+  // Task information
   DateTime? selectedDate;
   TimeOfDay? selectedTime;
 
-  // Priority and Reminder
+  // Priority and reminder
   String selectedPriority = 'medium';
   String selectedReminder = 'none';
 
-  // Selected Goal
+  // Automatically assigned goal ID
   String? selectedGoalId;
-
-  // Available Goals
-  List<Map<String, String>> goals = [];
-
-  bool isLoading = false;
-  bool isLoadingGoals = false;
-
-  String? goalsError;
 
   TaskModel? _existingTask;
 
-  StreamSubscription<List<GoalModel>>? _goalsSubscription;
-
-  // Load existing task
+  // Load existing task data
   void _loadTask(TaskModel task) {
     _existingTask = task;
 
     titleController.text = task.title;
     descriptionController.text = task.description;
     subjectController.text = task.subject;
+    durationController.text = task.estimatedDuration.toString();
 
     selectedDate = task.dueDate;
 
@@ -61,55 +50,21 @@ class AddEditTaskViewModel extends ChangeNotifier {
       minute: task.dueDate.minute,
     );
 
-    durationController.text = task.estimatedDuration.toString();
-
     selectedPriority = task.priority;
     selectedReminder = task.reminder;
+
+    // Preserve the original goal when editing.
     selectedGoalId = task.goalId;
-  }
-
-  // Load goals belonging to the current user
-  void loadGoals(String userId) {
-    if (userId.isEmpty) return;
-
-    _goalsSubscription?.cancel();
-
-    isLoadingGoals = true;
-    goalsError = null;
-    notifyListeners();
-
-    _goalsSubscription = _goalService
-        .watchGoals(userId)
-        .listen(
-          (goalList) {
-            goals = goalList.map((goal) {
-              return {'id': goal.id, 'title': goal.title};
-            }).toList();
-
-            // Clear selection if the selected goal no longer exists.
-            if (selectedGoalId != null &&
-                !goals.any((goal) => goal['id'] == selectedGoalId)) {
-              selectedGoalId = null;
-            }
-
-            isLoadingGoals = false;
-            goalsError = null;
-            notifyListeners();
-          },
-          onError: (error) {
-            isLoadingGoals = false;
-            goalsError = 'Could not load goals.';
-            notifyListeners();
-          },
-        );
   }
 
   // Select due date
   Future<void> selectDate(BuildContext context) async {
+    final now = DateTime.now();
+
     final pickedDate = await showDatePicker(
       context: context,
-      initialDate: selectedDate ?? DateTime.now(),
-      firstDate: DateTime.now(),
+      initialDate: selectedDate ?? now,
+      firstDate: DateTime(now.year, now.month, now.day),
       lastDate: DateTime(2100),
     );
 
@@ -141,12 +96,6 @@ class AddEditTaskViewModel extends ChangeNotifier {
   // Change reminder
   void changeReminder(String reminder) {
     selectedReminder = reminder;
-    notifyListeners();
-  }
-
-  // Change selected goal
-  void changeGoal(String? goalId) {
-    selectedGoalId = goalId;
     notifyListeners();
   }
 
@@ -213,8 +162,6 @@ class AddEditTaskViewModel extends ChangeNotifier {
 
   @override
   void dispose() {
-    _goalsSubscription?.cancel();
-
     titleController.dispose();
     descriptionController.dispose();
     subjectController.dispose();

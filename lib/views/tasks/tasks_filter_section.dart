@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:taskora/views/tasks/task_filter_chip.dart';
+import '../../core/theme/app_colors.dart';
 
 class TasksFilterSection extends StatelessWidget {
   final String selectedFilter;
@@ -29,7 +30,7 @@ class TasksFilterSection extends StatelessWidget {
           style: TextStyle(
             fontSize: 17,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF1B2B4F),
+            color: AppColors.textPrimary,
           ),
         ),
 

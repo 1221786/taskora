@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/theme/app_colors.dart';
 
 class TasksSearchSection extends StatelessWidget {
   final ValueChanged<String> onChanged;
@@ -11,13 +12,13 @@ class TasksSearchSection extends StatelessWidget {
       height: 52,
       padding: const EdgeInsets.symmetric(horizontal: 15),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: const Color(0xFFE8EAF0)),
+        border: Border.all(color: AppColors.border),
       ),
       child: Row(
         children: [
-          const Icon(Icons.search, color: Colors.grey, size: 23),
+          const Icon(Icons.search, color: AppColors.textSecondary, size: 23),
 
           const SizedBox(width: 12),
 
@@ -26,7 +27,7 @@ class TasksSearchSection extends StatelessWidget {
               onChanged: onChanged,
               decoration: const InputDecoration(
                 hintText: 'Search tasks...',
-                hintStyle: TextStyle(color: Colors.grey, fontSize: 14),
+                hintStyle: TextStyle(color: AppColors.mutedText, fontSize: 14),
                 border: InputBorder.none,
                 isCollapsed: true,
               ),

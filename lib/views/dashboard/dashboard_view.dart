@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../Authentication/Login/login_view.dart';
+import '../../core/theme/app_colors.dart';
 
 import 'dashboard_header.dart';
 import 'today_progress_card.dart';
@@ -10,7 +12,10 @@ import 'dashboard_bottom_navigation.dart';
 import 'dashboard_view_model.dart';
 
 import '../tasks/tasks_view.dart';
-import '../calendar/calendar_view.dart';
+import '../goals/views/goals_view.dart';
+import '../statistics/statistics_view.dart';
+import '../profile/views/profile_view.dart';
+import '../notifications/views/notifications_view.dart';
 
 class TaskoraDashboardView extends StatefulWidget {
   const TaskoraDashboardView({super.key});
@@ -25,13 +30,49 @@ class _TaskoraDashboardViewState extends State<TaskoraDashboardView> {
   @override
   void initState() {
     super.initState();
-    _viewModel = DashboardViewModel();
+
+    _viewModel = DashboardViewModel(
+      userId: FirebaseAuth.instance.currentUser?.uid,
+    );
   }
 
   @override
   void dispose() {
     _viewModel.dispose();
     super.dispose();
+  }
+
+  Future<void> _logout() async {
+    await FirebaseAuth.instance.signOut();
+
+    if (!mounted) return;
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const TaskoraLoginView()),
+      (route) => false,
+    );
+  }
+
+  void _openNotifications() {
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+
+    if (userId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please login to view notifications.'),
+          backgroundColor: AppColors.primaryDark,
+        ),
+      );
+      return;
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => NotificationsView(userId: userId),
+      ),
+    );
   }
 
   Widget _buildHomePage() {
@@ -43,24 +84,34 @@ class _TaskoraDashboardViewState extends State<TaskoraDashboardView> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             DashboardHeader(
-              onLogout: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const TaskoraLoginView(),
-                  ),
-                );
-              },
+              onLogout: _logout,
+              onNotificationsTap: _openNotifications,
+              name: _viewModel.profile?.name ?? '',
+              photoBase64: _viewModel.profile?.photoBase64,
             ),
 
             const SizedBox(height: 26),
-            const TodayProgressCard(),
+
+            TodayProgressCard(
+              completed: _viewModel.completedTodayCount,
+              total: _viewModel.totalTodayCount,
+            ),
 
             const SizedBox(height: 25),
-            const TodayTasksSection(),
+
+            TodayTasksSection(
+              tasks: _viewModel.todayTasks,
+              isLoading: _viewModel.isLoadingTasks,
+              onToggle: _viewModel.toggleTaskCompletion,
+              onDelete: _viewModel.deleteTask,
+            ),
 
             const SizedBox(height: 25),
-            const UpcomingTasksSection(),
+
+            UpcomingTasksSection(
+              tasks: _viewModel.upcomingTasks,
+              isLoading: _viewModel.isLoadingTasks,
+            ),
 
             const SizedBox(height: 15),
           ],
@@ -75,19 +126,13 @@ class _TaskoraDashboardViewState extends State<TaskoraDashboardView> {
         return const TasksView();
 
       case 2:
-        return const CalendarView();
+        return const GoalsView();
 
       case 3:
-        return const Center(
-          child: Text(
-            'Profile page coming soon',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF1B2B4F),
-            ),
-          ),
-        );
+        return const StatisticsView();
+
+      case 4:
+        return ProfileView(onLogout: _logout);
 
       default:
         return _buildHomePage();
@@ -100,10 +145,8 @@ class _TaskoraDashboardViewState extends State<TaskoraDashboardView> {
       listenable: _viewModel,
       builder: (context, child) {
         return Scaffold(
-          backgroundColor: const Color(0xFFF8F9FC),
-
+          backgroundColor: AppColors.background,
           body: _buildSelectedPage(),
-
           bottomNavigationBar: DashboardBottomNavigation(
             currentIndex: _viewModel.currentIndex,
             onTap: _viewModel.changePage,

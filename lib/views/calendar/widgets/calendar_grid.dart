@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_colors.dart';
+
 class CalendarGrid extends StatelessWidget {
   final int daysInMonth;
   final int startingWeekday;
@@ -55,10 +57,10 @@ class CalendarGrid extends StatelessWidget {
           onTap: () => onDateSelected(date),
           child: Container(
             decoration: BoxDecoration(
-              color: selected ? const Color(0xFF6C63FF) : Colors.transparent,
+              color: selected ? AppColors.primary : Colors.transparent,
               shape: BoxShape.circle,
               border: today && !selected
-                  ? Border.all(color: const Color(0xFF6C63FF), width: 1.5)
+                  ? Border.all(color: AppColors.primary, width: 1.5)
                   : null,
             ),
             alignment: Alignment.center,
@@ -69,7 +71,7 @@ class CalendarGrid extends StatelessWidget {
                 fontWeight: selected || today
                     ? FontWeight.bold
                     : FontWeight.normal,
-                color: selected ? Colors.white : const Color(0xFF1B2B4F),
+                color: selected ? AppColors.white : AppColors.textPrimary,
               ),
             ),
           ),

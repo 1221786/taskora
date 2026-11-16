@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_colors.dart';
 import '../../tasks/models/task_model.dart';
 
 class LinkedTasksSection extends StatelessWidget {
   final List<TaskModel> tasks;
   final bool isUpdating;
   final ValueChanged<String> onRemoveTask;
+  final void Function(String taskId, bool isCompleted) onToggleTask;
 
   const LinkedTasksSection({
     super.key,
     required this.tasks,
     required this.onRemoveTask,
+    required this.onToggleTask,
     this.isUpdating = false,
   });
 
@@ -21,13 +24,13 @@ class LinkedTasksSection extends StatelessWidget {
   Color _priorityColor(String priority) {
     switch (priority.toLowerCase()) {
       case 'high':
-        return const Color(0xFFE85D5D);
+        return AppColors.priorityHigh;
       case 'medium':
-        return const Color(0xFFE5A93D);
+        return AppColors.priorityMedium;
       case 'low':
-        return const Color(0xFF45B77A);
+        return AppColors.priorityLow;
       default:
-        return const Color(0xFF9297A5);
+        return AppColors.mutedText;
     }
   }
 
@@ -41,10 +44,9 @@ class LinkedTasksSection extends StatelessWidget {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF1B2B4F),
+            color: AppColors.textPrimary,
           ),
         ),
-
         const SizedBox(height: 15),
 
         if (tasks.isEmpty)
@@ -52,18 +54,18 @@ class LinkedTasksSection extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(22),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.cardBackground,
               borderRadius: BorderRadius.circular(15),
-              border: Border.all(color: const Color(0xFFE9ECF3)),
+              border: Border.all(color: AppColors.border),
             ),
             child: const Column(
               children: [
-                Icon(Icons.task_outlined, size: 35, color: Color(0xFF9297A5)),
+                Icon(Icons.task_outlined, size: 35, color: AppColors.mutedText),
                 SizedBox(height: 10),
                 Text(
                   'No tasks linked to this goal yet.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 13, color: Color(0xFF9297A5)),
+                  style: TextStyle(fontSize: 13, color: AppColors.mutedText),
                 ),
               ],
             ),
@@ -76,20 +78,30 @@ class LinkedTasksSection extends StatelessWidget {
               margin: const EdgeInsets.only(bottom: 12),
               padding: const EdgeInsets.all(15),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.cardBackground,
                 borderRadius: BorderRadius.circular(15),
-                border: Border.all(color: const Color(0xFFE9ECF3)),
+                border: Border.all(color: AppColors.border),
               ),
               child: Row(
                 children: [
-                  Icon(
-                    task.isCompleted
-                        ? Icons.check_circle
-                        : Icons.radio_button_unchecked,
-                    color: task.isCompleted
-                        ? const Color(0xFF45B77A)
-                        : const Color(0xFF9297A5),
-                    size: 21,
+                  // Toggle task completion
+                  InkWell(
+                    onTap: isUpdating
+                        ? null
+                        : () => onToggleTask(task.id, !task.isCompleted),
+                    borderRadius: BorderRadius.circular(30),
+                    child: Padding(
+                      padding: const EdgeInsets.all(3),
+                      child: Icon(
+                        task.isCompleted
+                            ? Icons.check_circle
+                            : Icons.radio_button_unchecked,
+                        color: task.isCompleted
+                            ? AppColors.success
+                            : AppColors.mutedText,
+                        size: 21,
+                      ),
+                    ),
                   ),
 
                   const SizedBox(width: 12),
@@ -103,38 +115,34 @@ class LinkedTasksSection extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color: const Color(0xFF1B2B4F),
+                            color: AppColors.textPrimary,
                             decoration: task.isCompleted
                                 ? TextDecoration.lineThrough
                                 : TextDecoration.none,
                           ),
                         ),
-
                         const SizedBox(height: 5),
-
                         Text(
                           task.subject,
                           style: const TextStyle(
                             fontSize: 12,
-                            color: Color(0xFF9297A5),
+                            color: AppColors.textSecondary,
                           ),
                         ),
-
                         const SizedBox(height: 7),
-
                         Row(
                           children: [
                             const Icon(
                               Icons.calendar_today_outlined,
                               size: 12,
-                              color: Color(0xFF9297A5),
+                              color: AppColors.mutedText,
                             ),
                             const SizedBox(width: 5),
                             Text(
                               _formatDate(task.dueDate),
                               style: const TextStyle(
                                 fontSize: 11,
-                                color: Color(0xFF9297A5),
+                                color: AppColors.mutedText,
                               ),
                             ),
                           ],
@@ -156,9 +164,7 @@ class LinkedTasksSection extends StatelessWidget {
                           color: priorityColor,
                         ),
                       ),
-
                       const SizedBox(height: 8),
-
                       IconButton(
                         onPressed: isUpdating
                             ? null
@@ -167,7 +173,7 @@ class LinkedTasksSection extends StatelessWidget {
                         icon: const Icon(
                           Icons.link_off,
                           size: 19,
-                          color: Color(0xFFE85D5D),
+                          color: AppColors.danger,
                         ),
                       ),
                     ],

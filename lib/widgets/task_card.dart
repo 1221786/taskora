@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../core/theme/app_colors.dart';
+
 class TaskCard extends StatelessWidget {
   final String title;
   final String subject;
@@ -25,11 +27,11 @@ class TaskCard extends StatelessWidget {
   Color get priorityColor {
     switch (priority.toLowerCase()) {
       case 'high':
-        return const Color(0xFFEF5350);
+        return AppColors.priorityHigh;
       case 'medium':
-        return const Color(0xFFF5B942);
+        return AppColors.priorityMedium;
       default:
-        return const Color(0xFF43B581);
+        return AppColors.priorityLow;
     }
   }
 
@@ -38,9 +40,9 @@ class TaskCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.cardBackground,
         borderRadius: BorderRadius.circular(17),
-        border: Border.all(color: const Color(0xFFEDEEF3)),
+        border: Border.all(color: AppColors.border),
       ),
       child: Row(
         children: [
@@ -59,9 +61,7 @@ class TaskCard extends StatelessWidget {
             onTap: onCheckboxTap,
             child: Icon(
               isCompleted ? Icons.check_circle : Icons.radio_button_unchecked,
-              color: isCompleted
-                  ? const Color(0xFF39B98A)
-                  : const Color(0xFFB8BCC9),
+              color: isCompleted ? AppColors.success : AppColors.mutedText,
               size: 23,
             ),
           ),
@@ -79,7 +79,7 @@ class TaskCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: const Color(0xFF1B2B4F),
+                    color: AppColors.textPrimary,
                     decoration: isCompleted ? TextDecoration.lineThrough : null,
                   ),
                 ),
@@ -90,7 +90,7 @@ class TaskCard extends StatelessWidget {
                   subject,
                   style: const TextStyle(
                     fontSize: 10,
-                    color: Color(0xFF9297A5),
+                    color: AppColors.mutedText,
                   ),
                 ),
 
@@ -122,7 +122,7 @@ class TaskCard extends StatelessWidget {
                     const Icon(
                       Icons.access_time_rounded,
                       size: 12,
-                      color: Color(0xFF9297A5),
+                      color: AppColors.mutedText,
                     ),
 
                     const SizedBox(width: 3),
@@ -131,7 +131,7 @@ class TaskCard extends StatelessWidget {
                       dueTime,
                       style: const TextStyle(
                         fontSize: 10,
-                        color: Color(0xFF9297A5),
+                        color: AppColors.mutedText,
                       ),
                     ),
                   ],
@@ -145,7 +145,7 @@ class TaskCard extends StatelessWidget {
             icon: const Icon(
               Icons.edit_outlined,
               size: 18,
-              color: Color(0xFF7E83A0),
+              color: AppColors.primary,
             ),
             visualDensity: VisualDensity.compact,
           ),
@@ -155,7 +155,7 @@ class TaskCard extends StatelessWidget {
             icon: const Icon(
               Icons.delete_outline_rounded,
               size: 19,
-              color: Color(0xFFE17C7C),
+              color: AppColors.danger,
             ),
             visualDensity: VisualDensity.compact,
           ),

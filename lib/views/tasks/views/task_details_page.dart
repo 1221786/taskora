@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_colors.dart';
 import '../models/task_model.dart';
 
 class TaskDetailsPage extends StatelessWidget {
@@ -15,20 +16,19 @@ class TaskDetailsPage extends StatelessWidget {
     final period = date.hour >= 12 ? 'PM' : 'AM';
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FC),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text(
           'Task Details',
           style: TextStyle(
-            color: Color(0xFF1B2B4F),
+            color: AppColors.textPrimary,
             fontWeight: FontWeight.bold,
           ),
         ),
-        backgroundColor: const Color(0xFFF8F9FC),
+        backgroundColor: AppColors.background,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Color(0xFF1B2B4F)),
+        iconTheme: const IconThemeData(color: AppColors.textPrimary),
       ),
-
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -38,7 +38,7 @@ class TaskDetailsPage extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.cardBackground,
                 borderRadius: BorderRadius.circular(18),
               ),
               child: Column(
@@ -49,7 +49,7 @@ class TaskDetailsPage extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF1B2B4F),
+                      color: AppColors.textPrimary,
                     ),
                   ),
 
@@ -61,7 +61,7 @@ class TaskDetailsPage extends StatelessWidget {
                         : task.description,
                     style: const TextStyle(
                       fontSize: 14,
-                      color: Color(0xFF687087),
+                      color: AppColors.textSecondary,
                       height: 1.6,
                     ),
                   ),
@@ -76,7 +76,7 @@ class TaskDetailsPage extends StatelessWidget {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF1B2B4F),
+                color: AppColors.textPrimary,
               ),
             ),
 
@@ -86,7 +86,7 @@ class TaskDetailsPage extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.cardBackground,
                 borderRadius: BorderRadius.circular(18),
               ),
               child: Column(
@@ -156,12 +156,15 @@ class _DetailRow extends StatelessWidget {
       padding: EdgeInsets.only(bottom: isLast ? 0 : 20),
       child: Row(
         children: [
-          Icon(icon, color: const Color(0xFF6C63FF), size: 20),
+          Icon(icon, color: AppColors.primary, size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               label,
-              style: const TextStyle(color: Color(0xFF858B9C), fontSize: 13),
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 13,
+              ),
             ),
           ),
           Flexible(
@@ -169,7 +172,7 @@ class _DetailRow extends StatelessWidget {
               value,
               textAlign: TextAlign.end,
               style: const TextStyle(
-                color: Color(0xFF1B2B4F),
+                color: AppColors.textPrimary,
                 fontWeight: FontWeight.w600,
                 fontSize: 13,
               ),

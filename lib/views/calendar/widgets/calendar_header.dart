@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_colors.dart';
+
 class CalendarHeader extends StatelessWidget {
   final String monthName;
   final int year;
@@ -31,31 +33,34 @@ class CalendarHeader extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF1B2B4F),
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 4),
                 const Text(
                   'Manage your schedule',
-                  style: TextStyle(fontSize: 13, color: Colors.grey),
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ],
             ),
           ),
           IconButton(
             onPressed: onPreviousMonth,
-            icon: const Icon(Icons.chevron_left),
+            icon: const Icon(Icons.chevron_left, color: AppColors.primary),
           ),
           IconButton(
             onPressed: onNextMonth,
-            icon: const Icon(Icons.chevron_right),
+            icon: const Icon(Icons.chevron_right, color: AppColors.primary),
           ),
           TextButton(
             onPressed: onToday,
             child: const Text(
               'Today',
               style: TextStyle(
-                color: Color(0xFF6C63FF),
+                color: AppColors.primary,
                 fontWeight: FontWeight.w600,
               ),
             ),

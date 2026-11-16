@@ -10,7 +10,7 @@ class TaskService {
 
   final String _collectionName = 'tasks';
 
-  // Add a new task
+  // Add a new task and return its Firestore document ID.
   Future<String> addTask(TaskModel task) async {
     final document = await _firestore
         .collection(_collectionName)
@@ -19,7 +19,7 @@ class TaskService {
     return document.id;
   }
 
-  // Update an existing task
+  // Update an existing task.
   Future<void> updateTask(TaskModel task) async {
     await _firestore
         .collection(_collectionName)
@@ -27,29 +27,31 @@ class TaskService {
         .update(task.toMap());
   }
 
-  // Save: Add or Update
-  Future<void> saveTask(TaskModel task) async {
+  // Save a task and return its document ID.
+  Future<String> saveTask(TaskModel task) async {
     if (task.id.isEmpty) {
-      await addTask(task);
-    } else {
-      await updateTask(task);
+      return await addTask(task);
     }
+
+    await updateTask(task);
+    return task.id;
   }
 
-  // Update task completion status
+  // Update task completion status and completion date.
   Future<void> updateTaskCompletion(String taskId, bool isCompleted) async {
     await _firestore.collection(_collectionName).doc(taskId).update({
       'isCompleted': isCompleted,
+      'completedAt': isCompleted ? FieldValue.serverTimestamp() : null,
       'updatedAt': FieldValue.serverTimestamp(),
     });
   }
 
-  // Delete task
+  // Delete a task.
   Future<void> deleteTask(String taskId) async {
     await _firestore.collection(_collectionName).doc(taskId).delete();
   }
 
-  // Listen to the current user's tasks
+  // Listen to the current user's tasks.
   Stream<List<TaskModel>> watchTasks(String userId) {
     return _firestore
         .collection(_collectionName)

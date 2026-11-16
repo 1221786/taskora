@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-
+import 'package:taskora/core/theme/app_colors.dart';
 import '../models/goal_model.dart';
 import '../view_models/goal_details_view_model.dart';
 import '../widgets/goal_progress_indicator.dart';
 import '../widgets/linked_tasks_section.dart';
 import 'add_edit_goal_view.dart';
+
+import '../../tasks/views/add_edit_task_page.dart';
 
 class GoalDetailsView extends StatefulWidget {
   final GoalModel goal;
@@ -23,10 +24,7 @@ class _GoalDetailsViewState extends State<GoalDetailsView> {
   void initState() {
     super.initState();
 
-    _viewModel = GoalDetailsViewModel(
-      goal: widget.goal,
-      userId: FirebaseAuth.instance.currentUser?.uid,
-    );
+    _viewModel = GoalDetailsViewModel(goal: widget.goal, userId: null);
   }
 
   @override
@@ -39,19 +37,28 @@ class _GoalDetailsViewState extends State<GoalDetailsView> {
     return '${date.day}/${date.month}/${date.year}';
   }
 
+  // -----------------------------
+  // Edit Goal
+  // -----------------------------
+
   Future<void> _editGoal() async {
-    await Navigator.push(
+    final updated = await Navigator.push<bool>(
       context,
       MaterialPageRoute(
         builder: (context) => AddEditGoalView(goal: widget.goal),
       ),
     );
 
-    if (mounted) {
-      // Return to the goals list so the updated goal is displayed.
-      Navigator.pop(context);
+    if (!mounted) return;
+
+    if (updated == true) {
+      Navigator.pop(context, true);
     }
   }
+
+  // -----------------------------
+  // Delete Goal
+  // -----------------------------
 
   Future<void> _deleteGoal() async {
     final shouldDelete = await showDialog<bool>(
@@ -69,7 +76,10 @@ class _GoalDetailsViewState extends State<GoalDetailsView> {
             ),
             TextButton(
               onPressed: () => Navigator.pop(dialogContext, true),
-              child: const Text('Delete', style: TextStyle(color: Colors.red)),
+              child: const Text(
+                'Delete',
+                style: TextStyle(color: AppColors.danger),
+              ),
             ),
           ],
         );
@@ -83,7 +93,7 @@ class _GoalDetailsViewState extends State<GoalDetailsView> {
     if (!mounted) return;
 
     if (success) {
-      Navigator.pop(context);
+      Navigator.pop(context, true);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -93,7 +103,100 @@ class _GoalDetailsViewState extends State<GoalDetailsView> {
     }
   }
 
+  // -----------------------------
+  // Add Task Options
+  // -----------------------------
+
   Future<void> _addTask() async {
+    final selectedOption = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Add Task to Goal'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.add_task, color: AppColors.primary),
+                title: const Text('Create New Task'),
+                subtitle: const Text('Create a new task for this goal.'),
+                onTap: () {
+                  Navigator.pop(dialogContext, 'create');
+                },
+              ),
+              const Divider(),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(
+                  Icons.playlist_add,
+                  color: AppColors.primary,
+                ),
+                title: const Text('Add Existing Task'),
+                subtitle: const Text('Link an existing task to this goal.'),
+                onTap: () {
+                  Navigator.pop(dialogContext, 'existing');
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Cancel'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (!mounted || selectedOption == null) return;
+
+    if (selectedOption == 'create') {
+      await _createNewTask();
+    } else if (selectedOption == 'existing') {
+      await _addExistingTask();
+    }
+  }
+
+  // -----------------------------
+  // Create New Task
+  // -----------------------------
+
+  Future<void> _createNewTask() async {
+    final userId = _viewModel.userId;
+
+    if (userId == null || userId.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please login first.')));
+      return;
+    }
+
+    if (widget.goal.id.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Invalid goal.')));
+      return;
+    }
+
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddEditTaskPage(
+          userId: userId,
+          initialGoalId: widget.goal.id,
+          onSaveTask: _viewModel.saveTask,
+        ),
+      ),
+    );
+  }
+
+  // -----------------------------
+  // Add Existing Task
+  // -----------------------------
+
+  Future<void> _addExistingTask() async {
     final selectedTaskId = await showDialog<String>(
       context: context,
       builder: (dialogContext) {
@@ -103,7 +206,7 @@ class _GoalDetailsViewState extends State<GoalDetailsView> {
             final tasks = _viewModel.availableTasks;
 
             return AlertDialog(
-              title: const Text('Add Task to Goal'),
+              title: const Text('Add Existing Task'),
               content: SizedBox(
                 width: double.maxFinite,
                 child: tasks.isEmpty
@@ -117,7 +220,8 @@ class _GoalDetailsViewState extends State<GoalDetailsView> {
                     : ListView.separated(
                         shrinkWrap: true,
                         itemCount: tasks.length,
-                        separatorBuilder: (_, __) => const Divider(height: 1),
+                        separatorBuilder: (context, index) =>
+                            const Divider(height: 1),
                         itemBuilder: (context, index) {
                           final task = tasks[index];
 
@@ -127,7 +231,7 @@ class _GoalDetailsViewState extends State<GoalDetailsView> {
                             subtitle: Text(task.subject),
                             trailing: const Icon(
                               Icons.add_circle_outline,
-                              color: Color(0xFF6C63FF),
+                              color: AppColors.primary,
                             ),
                             onTap: () {
                               Navigator.pop(dialogContext, task.id);
@@ -165,6 +269,28 @@ class _GoalDetailsViewState extends State<GoalDetailsView> {
     );
   }
 
+  // -----------------------------
+  // Toggle Task Completion
+  // -----------------------------
+
+  Future<void> _toggleTask(String taskId, bool isCompleted) async {
+    final success = await _viewModel.toggleTaskCompletion(taskId, isCompleted);
+
+    if (!mounted) return;
+
+    if (!success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(_viewModel.errorMessage ?? 'Could not update task.'),
+        ),
+      );
+    }
+  }
+
+  // -----------------------------
+  // Remove Task from Goal
+  // -----------------------------
+
   Future<void> _removeTask(String taskId) async {
     final shouldRemove = await showDialog<bool>(
       context: context,
@@ -179,7 +305,10 @@ class _GoalDetailsViewState extends State<GoalDetailsView> {
             ),
             TextButton(
               onPressed: () => Navigator.pop(dialogContext, true),
-              child: const Text('Remove', style: TextStyle(color: Colors.red)),
+              child: const Text(
+                'Remove',
+                style: TextStyle(color: AppColors.danger),
+              ),
             ),
           ],
         );
@@ -203,12 +332,16 @@ class _GoalDetailsViewState extends State<GoalDetailsView> {
     );
   }
 
+  // -----------------------------
+  // Header
+  // -----------------------------
+
   Widget _buildHeader() {
     return Row(
       children: [
         IconButton(
           onPressed: () => Navigator.pop(context),
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
         ),
         const Expanded(
           child: Text(
@@ -216,30 +349,34 @@ class _GoalDetailsViewState extends State<GoalDetailsView> {
             style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF1B2B4F),
+              color: AppColors.textPrimary,
             ),
           ),
         ),
         IconButton(
-          onPressed: _editGoal,
+          onPressed: _viewModel.isUpdating ? null : _editGoal,
           tooltip: 'Edit Goal',
-          icon: const Icon(Icons.edit_outlined, color: Color(0xFF6C63FF)),
+          icon: const Icon(Icons.edit_outlined, color: AppColors.primary),
         ),
         IconButton(
-          onPressed: _deleteGoal,
+          onPressed: _viewModel.isUpdating ? null : _deleteGoal,
           tooltip: 'Delete Goal',
-          icon: const Icon(Icons.delete_outline, color: Colors.red),
+          icon: const Icon(Icons.delete_outline, color: AppColors.danger),
         ),
       ],
     );
   }
+
+  // -----------------------------
+  // Goal Information
+  // -----------------------------
 
   Widget _buildGoalInformation() {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.cardBackground,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
@@ -250,14 +387,17 @@ class _GoalDetailsViewState extends State<GoalDetailsView> {
             style: const TextStyle(
               fontSize: 21,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF1B2B4F),
+              color: AppColors.textPrimary,
             ),
           ),
           if (widget.goal.description.isNotEmpty) ...[
             const SizedBox(height: 10),
             Text(
               widget.goal.description,
-              style: const TextStyle(fontSize: 14, color: Colors.black54),
+              style: const TextStyle(
+                fontSize: 14,
+                color: AppColors.textSecondary,
+              ),
             ),
           ],
           const SizedBox(height: 20),
@@ -266,11 +406,14 @@ class _GoalDetailsViewState extends State<GoalDetailsView> {
               const Icon(
                 Icons.calendar_today_outlined,
                 size: 17,
-                color: Color(0xFF6C63FF),
+                color: AppColors.primary,
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: Text('Start: ${_formatDate(widget.goal.startDate)}'),
+                child: Text(
+                  'Start: ${_formatDate(widget.goal.startDate)}',
+                  style: const TextStyle(color: AppColors.textPrimary),
+                ),
               ),
             ],
           ),
@@ -280,11 +423,14 @@ class _GoalDetailsViewState extends State<GoalDetailsView> {
               const Icon(
                 Icons.flag_outlined,
                 size: 17,
-                color: Color(0xFF6C63FF),
+                color: AppColors.primary,
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: Text('Target: ${_formatDate(widget.goal.targetDate)}'),
+                child: Text(
+                  'Target: ${_formatDate(widget.goal.targetDate)}',
+                  style: const TextStyle(color: AppColors.textPrimary),
+                ),
               ),
             ],
           ),
@@ -293,6 +439,10 @@ class _GoalDetailsViewState extends State<GoalDetailsView> {
     );
   }
 
+  // -----------------------------
+  // Goal Progress
+  // -----------------------------
+
   Widget _buildProgress() {
     final percentage = (_viewModel.progressPercentage * 100).round();
 
@@ -300,7 +450,7 @@ class _GoalDetailsViewState extends State<GoalDetailsView> {
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.cardBackground,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
@@ -311,7 +461,7 @@ class _GoalDetailsViewState extends State<GoalDetailsView> {
             style: TextStyle(
               fontSize: 17,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF1B2B4F),
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 15),
@@ -322,19 +472,19 @@ class _GoalDetailsViewState extends State<GoalDetailsView> {
               _buildCountItem(
                 'Completed',
                 _viewModel.completedTasksCount,
-                const Color(0xFF35B58A),
+                AppColors.success,
               ),
               const Spacer(),
               _buildCountItem(
                 'Remaining',
                 _viewModel.remainingTasksCount,
-                const Color(0xFFE5A23B),
+                AppColors.warning,
               ),
               const Spacer(),
               _buildCountItem(
                 'Total',
                 _viewModel.totalTasksCount,
-                const Color(0xFF6C63FF),
+                AppColors.primary,
               ),
             ],
           ),
@@ -342,13 +492,13 @@ class _GoalDetailsViewState extends State<GoalDetailsView> {
           if (_viewModel.isCompleted)
             const Row(
               children: [
-                Icon(Icons.check_circle, color: Color(0xFF35B58A)),
+                Icon(Icons.check_circle, color: AppColors.success),
                 SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     'Congratulations! All goal tasks are completed.',
                     style: TextStyle(
-                      color: Color(0xFF27966F),
+                      color: AppColors.success,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -358,13 +508,13 @@ class _GoalDetailsViewState extends State<GoalDetailsView> {
           else if (_viewModel.totalTasksCount == 0)
             const Text(
               'No tasks linked to this goal yet.',
-              style: TextStyle(color: Colors.black54),
+              style: TextStyle(color: AppColors.textSecondary),
             )
           else
             Text(
               '$percentage% completed',
               style: const TextStyle(
-                color: Color(0xFF6C63FF),
+                color: AppColors.primary,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -372,6 +522,10 @@ class _GoalDetailsViewState extends State<GoalDetailsView> {
       ),
     );
   }
+
+  // -----------------------------
+  // Count Item
+  // -----------------------------
 
   Widget _buildCountItem(String label, int count, Color color) {
     return Column(
@@ -387,11 +541,15 @@ class _GoalDetailsViewState extends State<GoalDetailsView> {
         ),
         Text(
           label,
-          style: const TextStyle(fontSize: 12, color: Colors.black54),
+          style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
         ),
       ],
     );
   }
+
+  // -----------------------------
+  // Linked Tasks Section
+  // -----------------------------
 
   Widget _buildTasksSection() {
     return Column(
@@ -405,7 +563,7 @@ class _GoalDetailsViewState extends State<GoalDetailsView> {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF1B2B4F),
+                color: AppColors.textPrimary,
               ),
             ),
             TextButton.icon(
@@ -420,15 +578,20 @@ class _GoalDetailsViewState extends State<GoalDetailsView> {
           tasks: _viewModel.linkedTasks,
           isUpdating: _viewModel.isUpdating,
           onRemoveTask: _removeTask,
+          onToggleTask: _toggleTask,
         ),
       ],
     );
   }
 
+  // -----------------------------
+  // Build
+  // -----------------------------
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FC),
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: ListenableBuilder(
           listenable: _viewModel,
@@ -441,7 +604,11 @@ class _GoalDetailsViewState extends State<GoalDetailsView> {
                 ),
                 Expanded(
                   child: _viewModel.isLoading
-                      ? const Center(child: CircularProgressIndicator())
+                      ? const Center(
+                          child: CircularProgressIndicator(
+                            color: AppColors.primary,
+                          ),
+                        )
                       : _viewModel.errorMessage != null
                       ? Center(
                           child: Padding(
@@ -449,6 +616,7 @@ class _GoalDetailsViewState extends State<GoalDetailsView> {
                             child: Text(
                               _viewModel.errorMessage!,
                               textAlign: TextAlign.center,
+                              style: const TextStyle(color: AppColors.danger),
                             ),
                           ),
                         )

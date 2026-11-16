@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_colors.dart';
 import '../../tasks/models/task_model.dart';
 
 class SelectedDateTasksSection extends StatelessWidget {
@@ -25,13 +26,13 @@ class SelectedDateTasksSection extends StatelessWidget {
   Color _priorityColor(String priority) {
     switch (priority.toLowerCase()) {
       case 'high':
-        return const Color(0xFFE85D5D);
+        return AppColors.priorityHigh;
       case 'medium':
-        return const Color(0xFFE5A93D);
+        return AppColors.priorityMedium;
       case 'low':
-        return const Color(0xFF45B77A);
+        return AppColors.priorityLow;
       default:
-        return const Color(0xFF9297A5);
+        return AppColors.mutedText;
     }
   }
 
@@ -47,7 +48,7 @@ class SelectedDateTasksSection extends StatelessWidget {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF1B2B4F),
+              color: AppColors.textPrimary,
             ),
           ),
 
@@ -57,7 +58,7 @@ class SelectedDateTasksSection extends StatelessWidget {
             const Center(
               child: Padding(
                 padding: EdgeInsets.all(20),
-                child: CircularProgressIndicator(color: Color(0xFF6C63FF)),
+                child: CircularProgressIndicator(color: AppColors.primary),
               ),
             )
           else if (errorMessage != null)
@@ -66,7 +67,7 @@ class SelectedDateTasksSection extends StatelessWidget {
                 padding: const EdgeInsets.all(20),
                 child: Text(
                   errorMessage!,
-                  style: const TextStyle(color: Colors.red),
+                  style: const TextStyle(color: AppColors.danger),
                 ),
               ),
             )
@@ -75,21 +76,21 @@ class SelectedDateTasksSection extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(22),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.cardBackground,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFE5E8EF)),
+                border: Border.all(color: AppColors.border),
               ),
               child: const Column(
                 children: [
                   Icon(
                     Icons.event_available_outlined,
                     size: 35,
-                    color: Color(0xFF9297A5),
+                    color: AppColors.mutedText,
                   ),
                   SizedBox(height: 10),
                   Text(
                     'No tasks for this date',
-                    style: TextStyle(fontSize: 14, color: Color(0xFF9297A5)),
+                    style: TextStyle(fontSize: 14, color: AppColors.mutedText),
                   ),
                 ],
               ),
@@ -102,9 +103,9 @@ class SelectedDateTasksSection extends StatelessWidget {
                 margin: const EdgeInsets.only(bottom: 12),
                 padding: const EdgeInsets.all(15),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.cardBackground,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: const Color(0xFFE5E8EF)),
+                  border: Border.all(color: AppColors.border),
                 ),
                 child: Row(
                   children: [
@@ -128,7 +129,7 @@ class SelectedDateTasksSection extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w600,
-                              color: const Color(0xFF1B2B4F),
+                              color: AppColors.textPrimary,
                               decoration: task.isCompleted
                                   ? TextDecoration.lineThrough
                                   : TextDecoration.none,
@@ -141,7 +142,7 @@ class SelectedDateTasksSection extends StatelessWidget {
                             task.subject,
                             style: const TextStyle(
                               fontSize: 12,
-                              color: Color(0xFF9297A5),
+                              color: AppColors.textSecondary,
                             ),
                           ),
 
@@ -152,14 +153,14 @@ class SelectedDateTasksSection extends StatelessWidget {
                               const Icon(
                                 Icons.access_time,
                                 size: 14,
-                                color: Color(0xFF9297A5),
+                                color: AppColors.mutedText,
                               ),
                               const SizedBox(width: 5),
                               Text(
                                 _formatTime(task.dueDate),
                                 style: const TextStyle(
                                   fontSize: 12,
-                                  color: Color(0xFF9297A5),
+                                  color: AppColors.textSecondary,
                                 ),
                               ),
                             ],
@@ -189,8 +190,8 @@ class SelectedDateTasksSection extends StatelessWidget {
                               ? Icons.check_circle
                               : Icons.radio_button_unchecked,
                           color: task.isCompleted
-                              ? const Color(0xFF45B77A)
-                              : const Color(0xFF9297A5),
+                              ? AppColors.success
+                              : AppColors.mutedText,
                           size: 20,
                         ),
                       ],

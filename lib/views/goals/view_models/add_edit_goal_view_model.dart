@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 
 import '../models/goal_model.dart';
 import '../services/goal_service.dart';
+import '../../notifications/models/notification_model.dart';
+import '../../notifications/services/notification_service.dart';
 
 class AddEditGoalViewModel extends ChangeNotifier {
   final GoalService _goalService;
+  final NotificationService _notificationService;
   final GoalModel? _existingGoal;
   final String? _userId;
 
@@ -12,9 +15,11 @@ class AddEditGoalViewModel extends ChangeNotifier {
     required String? userId,
     GoalModel? goal,
     GoalService? goalService,
+    NotificationService? notificationService,
   }) : _userId = userId,
        _existingGoal = goal,
-       _goalService = goalService ?? GoalService() {
+       _goalService = goalService ?? GoalService(),
+       _notificationService = notificationService ?? NotificationService() {
     _initialize();
   }
 
@@ -22,6 +27,7 @@ class AddEditGoalViewModel extends ChangeNotifier {
   String _description = '';
 
   DateTime _startDate = DateUtils.dateOnly(DateTime.now());
+
   DateTime _targetDate = DateUtils.dateOnly(
     DateTime.now().add(const Duration(days: 7)),
   );
@@ -38,6 +44,7 @@ class AddEditGoalViewModel extends ChangeNotifier {
 
   bool get isEditing => _existingGoal != null;
 
+  // Initialize existing goal data when editing.
   void _initialize() {
     if (_existingGoal == null) return;
 
@@ -47,16 +54,19 @@ class AddEditGoalViewModel extends ChangeNotifier {
     _targetDate = _existingGoal.targetDate;
   }
 
+  // Update goal title.
   void setTitle(String value) {
     _title = value;
     notifyListeners();
   }
 
+  // Update goal description.
   void setDescription(String value) {
     _description = value;
     notifyListeners();
   }
 
+  // Update start date.
   void setStartDate(DateTime date) {
     _startDate = DateUtils.dateOnly(date);
 
@@ -67,11 +77,13 @@ class AddEditGoalViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Update target date.
   void setTargetDate(DateTime date) {
     _targetDate = DateUtils.dateOnly(date);
     notifyListeners();
   }
 
+  // Validate goal information.
   bool _validate() {
     if (_title.trim().isEmpty) {
       _errorMessage = 'Please enter a goal title.';
@@ -86,18 +98,54 @@ class AddEditGoalViewModel extends ChangeNotifier {
     return true;
   }
 
-  Future<bool> saveGoal() async {
+  // Schedule or update the goal deadline reminder.
+  Future<void> _updateGoalReminder(GoalModel savedGoal) async {
+    try {
+      await _notificationService.scheduleGoalReminder(savedGoal);
+    } catch (error) {
+      debugPrint('Goal reminder scheduling failed: $error');
+    }
+  }
+
+  // Save goal creation or update activity notification.
+  Future<void> _saveGoalActivityNotification(
+    GoalModel goal,
+    NotificationType type,
+  ) async {
+    final notification = NotificationModel(
+      id: 'goal_${goal.id}_${type.name}_${DateTime.now().microsecondsSinceEpoch}',
+      userId: goal.userId,
+      title: type == NotificationType.goalCreated
+          ? 'Goal Created'
+          : 'Goal Updated',
+      body: type == NotificationType.goalCreated
+          ? 'Your goal "${goal.title}" was created successfully.'
+          : 'Your goal "${goal.title}" was updated successfully.',
+      type: type,
+      goalId: goal.id,
+      createdAt: DateTime.now(),
+    );
+
+    try {
+      await _notificationService.saveAndShowNotification(notification);
+    } catch (error) {
+      debugPrint('GOAL ACTIVITY NOTIFICATION ERROR: $error');
+    }
+  }
+
+  // Save goal.
+  Future<GoalModel?> saveGoal() async {
     final userId = _userId;
 
     if (userId == null || userId.isEmpty) {
       _errorMessage = 'Please login first.';
       notifyListeners();
-      return false;
+      return null;
     }
 
     if (!_validate()) {
       notifyListeners();
-      return false;
+      return null;
     }
 
     _isLoading = true;
@@ -115,22 +163,46 @@ class AddEditGoalViewModel extends ChangeNotifier {
         createdAt: _existingGoal?.createdAt,
       );
 
+      late final GoalModel savedGoal;
+
       if (isEditing) {
         await _goalService.updateGoal(goal);
+        savedGoal = goal;
       } else {
-        await _goalService.addGoal(goal);
+        final goalId = await _goalService.addGoal(goal);
+
+        savedGoal = GoalModel(
+          id: goalId,
+          title: goal.title,
+          description: goal.description,
+          startDate: goal.startDate,
+          targetDate: goal.targetDate,
+          userId: goal.userId,
+          createdAt: DateTime.now(),
+        );
       }
+
+      // Schedule the deadline reminder after successful saving.
+      await _updateGoalReminder(savedGoal);
+
+      // Save and show the activity notification.
+      await _saveGoalActivityNotification(
+        savedGoal,
+        isEditing ? NotificationType.goalUpdated : NotificationType.goalCreated,
+      );
 
       _isLoading = false;
       notifyListeners();
 
-      return true;
+      return savedGoal;
     } catch (error) {
       _isLoading = false;
       _errorMessage = 'Could not save goal. Please try again.';
       notifyListeners();
 
-      return false;
+      debugPrint('Save goal failed: $error');
+
+      return null;
     }
   }
 }
