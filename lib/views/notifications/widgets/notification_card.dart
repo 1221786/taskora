@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:taskora/core/theme/app_colors.dart';
 
 import '../models/notification_model.dart';
 
@@ -41,26 +42,26 @@ class NotificationCard extends StatelessWidget {
     switch (notification.type) {
       case NotificationType.taskCreated:
       case NotificationType.taskUpdated:
-        return Colors.blue;
+        return AppColors.secondary;
 
       case NotificationType.taskCompleted:
       case NotificationType.goalCompleted:
-        return Colors.green;
+        return AppColors.success;
 
       case NotificationType.taskDeleted:
-        return Colors.red;
+        return AppColors.danger;
 
       case NotificationType.taskReminder:
       case NotificationType.calendarReminder:
       case NotificationType.goalReminder:
-        return Colors.orange;
+        return AppColors.warning;
 
       case NotificationType.goalCreated:
       case NotificationType.goalUpdated:
-        return Colors.purple;
+        return AppColors.primary;
 
       case NotificationType.general:
-        return Colors.blueGrey;
+        return AppColors.primaryDark;
     }
   }
 
@@ -94,13 +95,15 @@ class NotificationCard extends StatelessWidget {
     return Card(
       elevation: 0,
       margin: const EdgeInsets.only(bottom: 12),
-      color: notification.isRead ? Colors.white : const Color(0xFFF0F0FF),
+      color: notification.isRead
+          ? AppColors.cardBackground
+          : AppColors.accent.withValues(alpha: 0.09),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
           color: notification.isRead
-              ? Colors.grey.shade200
-              : const Color(0xFF6C63FF).withValues(alpha: 0.25),
+              ? AppColors.border
+              : AppColors.accent.withValues(alpha: 0.4),
         ),
       ),
       child: InkWell(
@@ -137,7 +140,7 @@ class NotificationCard extends StatelessWidget {
                               fontWeight: notification.isRead
                                   ? FontWeight.w500
                                   : FontWeight.w700,
-                              color: const Color(0xFF252542),
+                              color: AppColors.textPrimary,
                             ),
                           ),
                         ),
@@ -147,7 +150,7 @@ class NotificationCard extends StatelessWidget {
                             width: 8,
                             height: 8,
                             decoration: const BoxDecoration(
-                              color: Color(0xFF6C63FF),
+                              color: AppColors.primary,
                               shape: BoxShape.circle,
                             ),
                           ),
@@ -158,9 +161,9 @@ class NotificationCard extends StatelessWidget {
 
                     Text(
                       notification.body,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 13,
-                        color: Colors.grey.shade600,
+                        color: AppColors.textSecondary,
                         height: 1.4,
                       ),
                     ),
@@ -169,9 +172,9 @@ class NotificationCard extends StatelessWidget {
 
                     Text(
                       _formatDate(notification.createdAt),
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 11,
-                        color: Colors.grey.shade500,
+                        color: AppColors.mutedText,
                       ),
                     ),
                   ],
@@ -182,9 +185,9 @@ class NotificationCard extends StatelessWidget {
                 IconButton(
                   onPressed: onDelete,
                   tooltip: 'Delete notification',
-                  icon: Icon(
+                  icon: const Icon(
                     Icons.delete_outline_rounded,
-                    color: Colors.grey.shade500,
+                    color: AppColors.mutedText,
                     size: 21,
                   ),
                 ),

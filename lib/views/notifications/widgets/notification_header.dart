@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:taskora/core/theme/app_colors.dart';
 
 class NotificationHeader extends StatelessWidget {
   final int unreadCount;
@@ -25,7 +26,7 @@ class NotificationHeader extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF252542),
+                  color: AppColors.textPrimary,
                 ),
               ),
               if (unreadCount > 0)
@@ -34,7 +35,7 @@ class NotificationHeader extends StatelessWidget {
                   child: const Text(
                     'Mark all as read',
                     style: TextStyle(
-                      color: Color(0xFF6C63FF),
+                      color: AppColors.primary,
                       fontWeight: FontWeight.w600,
                       fontSize: 12,
                     ),
@@ -48,7 +49,10 @@ class NotificationHeader extends StatelessWidget {
                 ? 'You are all caught up!'
                 : 'You have $unreadCount unread '
                       '${unreadCount == 1 ? 'notification' : 'notifications'}.',
-            style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+            style: const TextStyle(
+              fontSize: 13,
+              color: AppColors.textSecondary,
+            ),
           ),
         ],
       ),

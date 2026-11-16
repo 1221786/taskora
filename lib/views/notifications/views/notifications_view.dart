@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:taskora/core/theme/app_colors.dart';
 
 import '../models/notification_model.dart';
 import '../view_models/notifications_view_model.dart';
@@ -23,7 +24,6 @@ class _NotificationsViewState extends State<NotificationsView> {
     super.initState();
 
     _viewModel = NotificationsViewModel(userId: widget.userId);
-
     _viewModel.loadNotifications();
   }
 
@@ -54,20 +54,20 @@ class _NotificationsViewState extends State<NotificationsView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FC),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF8F9FC),
+        backgroundColor: AppColors.background,
         elevation: 0,
         centerTitle: false,
         title: const Text(
           'Notifications',
           style: TextStyle(
-            color: Color(0xFF252542),
+            color: AppColors.textPrimary,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
         ),
-        iconTheme: const IconThemeData(color: Color(0xFF252542)),
+        iconTheme: const IconThemeData(color: AppColors.textPrimary),
       ),
       body: AnimatedBuilder(
         animation: _viewModel,
@@ -75,7 +75,7 @@ class _NotificationsViewState extends State<NotificationsView> {
           final notifications = _viewModel.notifications;
 
           return RefreshIndicator(
-            color: const Color(0xFF6C63FF),
+            color: AppColors.primary,
             onRefresh: _refreshNotifications,
             child: ListView(
               physics: const AlwaysScrollableScrollPhysics(),
@@ -93,7 +93,7 @@ class _NotificationsViewState extends State<NotificationsView> {
                     padding: EdgeInsets.only(top: 100),
                     child: Center(
                       child: CircularProgressIndicator(
-                        color: Color(0xFF6C63FF),
+                        color: AppColors.primary,
                       ),
                     ),
                   )
@@ -134,20 +134,20 @@ class _NotificationsViewState extends State<NotificationsView> {
             style: TextStyle(
               fontSize: 17,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF252542),
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 8),
           Text(
             _viewModel.errorMessage ?? 'Please try again.',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+            style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
           ),
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: _viewModel.loadNotifications,
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF6C63FF),
+              backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
             ),
             child: const Text('Try Again'),
